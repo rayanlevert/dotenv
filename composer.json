@@ -1,5 +1,5 @@
 {
-    "name": "dis-dev/cli",
+    "name": "dis-dev/dotenv",
     "description": "Class qui gère un fichier d'environnement (.env) et charge son contenu dans les superglobals $_ENV et $_SERVER",
     "type": "library",
     "require": {
