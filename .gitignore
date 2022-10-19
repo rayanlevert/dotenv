@@ -1,2 +1,5 @@
 /vendor/
 .phpunit.result.cache
+
+data/*
+!/**/.gitkeep
