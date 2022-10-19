@@ -225,6 +225,57 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * @test Test le fichier test.env, sample d'un vrai fichier .env
+     */
+    public function testSampleTestCsvAllVariables(): void
+    {
+        (new Dotenv('/app/tests/test.env'))->load();
+
+        $this->assertVariableIsHandled('APP_ENV', 'development');
+        $this->assertVariableIsHandled('APP_NAME', '"Nom de l\'application test"'); // les quotes sont gardées
+        $this->assertVariableIsHandled('APP_URL', 'https://test.local.fr');
+        $this->assertVariableIsHandled('APP_CACHE', '/app/cache');
+        $this->assertVariableIsHandled('APP_LOGS', '/app/logs');
+
+        $this->assertVariableIsHandled('WEB_DOCUMENT_ROOT', '/app/public');
+        $this->assertVariableIsHandled('WEB_ALIAS_DOMAIN', 'test.local.fr');
+
+        $this->assertVariableIsHandled('MYSQL_ROOT_PASSWORD', 'root');
+        $this->assertVariableIsHandled('MYSQL_DATABASE', 'test_base');
+        $this->assertVariableIsHandled('MYSQL_USER', 'root');
+        $this->assertVariableIsHandled('MYSQL_PASSWORD', 'root');
+        $this->assertVariableIsHandled('MYSQL_PORT', 33061);
+        $this->assertVariableIsHandled('MYSQL_HOST', 'mysql');
+
+        $this->assertVariableIsHandled('REDIS_HOST', 'redis');
+        $this->assertVariableIsHandled('REDIS_PORT', 6379);
+        $this->assertVariableIsHandled('REDIS_PASSWORD', ''); // Aucune valeur => empty string
+        $this->assertVariableIsHandled('REDIS_INDEX', 0);
+        $this->assertVariableIsHandled('REDIS_LIFETIME', 7200);
+        $this->assertVariableIsHandled('REDIS_PERSISTENT', true);
+
+        $this->assertVariableIsHandled('SESSION_PERSISTENT', true);
+        $this->assertVariableIsHandled('SESSION_LIFETIME', 43200);
+        $this->assertVariableIsHandled('SESSION_SECURE', 1);
+        $this->assertVariableIsHandled('SESSION_HTTPONLY', 1);
+
+        $this->assertVariableIsHandled('SECURITY_KEY', 'i³}tß¬¿ìò»å7L¼¤<¸%SÔº¶^µ2È]³öXG¹»ï@³î2jÒ8º');
+        $this->assertVariableIsHandled('SECURITY_JWT_MIN_TTL', 0);
+        $this->assertVariableIsHandled('SECURITY_JWT_MAX_TTL', 3600);
+
+        $this->assertVariableIsHandled('MAILER_DRIVER', 'smtp');
+        $this->assertVariableIsHandled('MAILER_HOST', 'mailer.host@mailer.com');
+        $this->assertVariableIsHandled('MAILER_PORT', 25);
+        $this->assertVariableIsHandled('MAILER_USERNAME', 'username@test.com');
+        $this->assertVariableIsHandled('MAILER_PASSWORD', 'testpassword');
+        $this->assertVariableIsHandled('MAILER_FROM_EMAIL', 'username@test.com');
+        $this->assertVariableIsHandled('MAILER_FROM_NAME', 'Mailer test');
+
+        $this->assertVariableIsHandled('XDEBUG_REMOTE_HOST', '192.168.1.129');
+        $this->assertVariableIsHandled('XDEBUG_REMOTE_PORT', 9000);
+    }
+
+    /**
      * Assert qu'une variable et sa valeur soit contenue dans $_ENV, $_SERVER et getenv()
      *
      * @param bool|string|int|float $expected
