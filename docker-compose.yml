@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+  app:
+    build: docker/app
+    restart: 'no'
+    working_dir: /app
+    ports:
+      - "8082:80"
+      - "4432:443"
+    volumes:
+      - .:/app

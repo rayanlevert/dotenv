@@ -1,0 +1,27 @@
+{
+    "name": "dis-dev/cli",
+    "description": "Class qui gère un fichier d'environnement (.env) et charge son contenu dans les superglobals $_ENV et $_SERVER",
+    "type": "library",
+    "require": {
+        "php": ">=7.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
+    "authors": [
+        {
+            "name": "Rayan",
+            "email": "rlevert@group-dis.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "DisDev\\Dotenv": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "DisDev\\Dotenv\\Tests": "tests/"
+        }
+    }
+}
