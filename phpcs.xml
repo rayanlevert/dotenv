@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<ruleset name="DisDev">
+    <description>DisDev Coding Standards</description>
+
+    <arg name="colors"/>
+    <arg value="sp"/>
+    <rule ref="PSR12"/>
+</ruleset>

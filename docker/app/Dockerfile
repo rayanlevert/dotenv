@@ -40,6 +40,7 @@ RUN apt-get install -f --no-install-recommends -y --allow-downgrades --allow-rem
     php8.1-psr \
     php8.1-xdebug \
     php8.1-xml \
+    php8.1-curl \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
     && a2enmod php8.1 \

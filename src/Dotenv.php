@@ -7,16 +7,14 @@ namespace DisDev\Dotenv;
  */
 class Dotenv
 {
-    protected string $filePath;
-
     /**
      * Set le chemin du fichier .env, vérifie qu'il est bien readable
      *
-     * @throws \DisDev\Dotenv\Dotenv Si le fichier n'existe pas, n'est pas readable ou est empty
+     * @throws \DisDev\Dotenv\Exception Si le fichier n'existe pas, n'est pas readable ou est empty
      */
-    public function __construct(string $filePath)
+    public function __construct(protected string $filePath)
     {
-        if (!is_file($filePath) || !is_readable($filePath) || !file_get_contents($filePath)) {
+        if (!is_file($filePath) || !is_readable($filePath)) {
             throw new Exception($filePath . ' n\'existe pas ou est empty');
         }
 
@@ -74,7 +72,7 @@ class Dotenv
      *
      * @param array<int, string> $envs Array indéxé des variables d'env required
      *
-     * @throws \DisDev\Dotenv\Dotenv Si au moins une seule variable n'est pas présente
+     * @throws \DisDev\Dotenv\Exception Si au moins une seule variable n'est pas présente
      */
     public function required(array $envs): void
     {

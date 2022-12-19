@@ -14,7 +14,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
      */
     public function testConstructorEmptyString(): void
     {
-        $this->expectExceptionObject(new Exception(' n\'existe pas ou est empty'));
+        $this->expectExceptionObject(new Exception(' n\'existe pas'));
 
         new Dotenv('');
     }
@@ -24,21 +24,29 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
      */
     public function testConstructorNotFile(): void
     {
-        $this->expectExceptionObject(new Exception(' n\'existe pas ou est empty'));
+        $this->expectExceptionObject(new Exception(' n\'existe pas'));
 
         new Dotenv('test');
     }
 
     /**
-     * @test Test le fichier d'un string qui n'est pas un fichier
+     * @test Test un fichier sans aucune donnée -> $_ENV empty
      */
     public function testConstructorEmptyFile(): void
     {
-        $this->expectExceptionObject(new Exception(' n\'existe pas ou est empty'));
+        (new Dotenv($this->createFile('/app/data/.env')))->load();
 
-        $this->createFile('/app/data/.env');
+        $this->assertSame([], $_ENV);
+    }
 
-        new Dotenv('/app/data/.env');
+    /**
+     * @test Test un fichier sans aucune donnée avec du required -> exception
+     */
+    public function testConstructorEmptyFileWithRequired(): void
+    {
+        $this->expectExceptionObject(new Exception('Missing env variables : APP_PATH'));
+
+        (new Dotenv($this->createFile('/app/data/.env')))->load()->required(['APP_PATH']);
     }
 
     /**
