@@ -71,16 +71,22 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @test Test le fichier ayant un diez dans la déclaration de la variable
+     * @test Test une variable avec un diez -> il faut qu'il y ait un espace pour considérer un commentaire
      */
-    public function testFileWithHashInBetween(): void
+    public function testValueWithDiez(): void
     {
-        $this->createFile('/app/data/.env', "TEST=test # Variable TEST\n TEST2=te#ST2");
+        $this->createFile(
+            '/app/data/.env',
+            "TEST=valueWith#\nTEST2=valueWith#InBetween\nTEST3=#\nTEST4=v a l u e # ici est le commentaire\nTEST5=test"
+        );
 
-        $this->assertInstanceOf(Dotenv::class, (new Dotenv('/app/data/.env'))->load());
+        (new Dotenv('/app/data/.env'))->load();
 
-        $this->assertVariableIsHandled('TEST', 'test');
-        $this->assertVariableIsHandled('TEST2', 'te');
+        $this->assertVariableIsHandled('TEST', 'valueWith#');
+        $this->assertVariableIsHandled('TEST2', 'valueWith#InBetween');
+        $this->assertVariableIsHandled('TEST3', '#');
+        $this->assertVariableIsHandled('TEST4', 'v a l u e');
+        $this->assertVariableIsHandled('TEST5', 'test');
     }
 
     /**
@@ -275,7 +281,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         $this->assertVariableIsHandled('MAILER_HOST', 'mailer.host@mailer.com');
         $this->assertVariableIsHandled('MAILER_PORT', 25);
         $this->assertVariableIsHandled('MAILER_USERNAME', 'username@test.com');
-        $this->assertVariableIsHandled('MAILER_PASSWORD', 'testpassword');
+        $this->assertVariableIsHandled('MAILER_PASSWORD', 'passwordAvecUn#DansLaValeur');
         $this->assertVariableIsHandled('MAILER_FROM_EMAIL', 'username@test.com');
         $this->assertVariableIsHandled('MAILER_FROM_NAME', 'Mailer test');
 
@@ -285,13 +291,11 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
 
     /**
      * Assert qu'une variable et sa valeur soit contenue dans $_ENV, $_SERVER et getenv()
-     *
-     * @param bool|string|int|float $expected
      */
-    private function assertVariableIsHandled(string $name, $expected): void
+    private function assertVariableIsHandled(string $name, bool|string|int|float $expected): void
     {
         $this->assertArrayHasKey($name, $_SERVER, "\$_SERVER n'a pas la clef $name");
-        $this->assertSame($expected, $_SERVER[$name], "\$_SERVER[\$name] n'a pas retourné expected $expected");
+        $this->assertSame($expected, $_SERVER[$name], "\$_SERVER[$name] n'a pas retourné expected $expected");
 
         $this->assertArrayHasKey($name, $_ENV, "\$_ENV n'a pas la clef $name");
         $this->assertSame($expected, $_ENV[$name], "\$_ENV[\$name] n'a pas retourné expected $expected");

@@ -35,8 +35,8 @@ class Dotenv
                 continue;
             }
 
-            // Si il y a un # après la déclaration de la variable, on enlève la partie doc
-            if ($pos = mb_strpos($line, '#')) {
+            // Si il y a un espace + # après la déclaration de la variable, on enlève la partie doc
+            if ($pos = mb_strpos($line, ' #')) {
                 $line = trim(substr_replace($line, '', $pos));
             }
 
