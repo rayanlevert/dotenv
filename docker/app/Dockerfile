@@ -15,8 +15,8 @@ RUN apt update -y && \
     wget \
     zip
 
-# Installing PHP Extensions
-RUN pecl install xdebug
+# Enabling xdebug
+RUN pecl install xdebug && docker-php-ext-enable xdebug
 
 # Créé le dossier /app
 RUN mkdir /app

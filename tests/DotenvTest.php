@@ -7,6 +7,9 @@ use DisDev\Dotenv\Exception;
 
 class DotenvTest extends \PHPUnit\Framework\TestCase
 {
+    /**
+     * @var array<int, string> Fichiers à delete après chaque test unitaire
+     */
     protected array $filesToDelete = [];
 
     /**
@@ -239,14 +242,95 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * @test Test une seule variable à multiline
+     */
+    public function testMultiLineOnlyVariable(): void
+    {
+        $this->createFile(
+            '/app/data/.env',
+            'TEST="First
+Second
+Third
+Line"'
+        );
+
+        (new Dotenv('/app/data/.env'))->load();
+
+        $this->assertVariableIsHandled(
+            'TEST',
+            'First
+Second
+Third
+Line'
+        );
+    }
+
+    /**
+     * @test Test plusieurs variables avec une à multiline
+     */
+    public function testMultiLineNotOnlyVariable(): void
+    {
+        $this->createFile(
+            '/app/data/.env',
+            "TEST2=test2\n" . 'TEST="First
+Second
+Third
+Line"
+ANOTHERTEST=testvalue
+ANOTHERTEST2=testvalue3'
+        );
+
+        (new Dotenv('/app/data/.env'))->load();
+
+        $this->assertVariableIsHandled('TEST2', 'test2');
+        $this->assertVariableIsHandled(
+            'TEST',
+            'First
+Second
+Third
+Line'
+        );
+        $this->assertVariableIsHandled('ANOTHERTEST', 'testvalue');
+        $this->assertVariableIsHandled('ANOTHERTEST2', 'testvalue3');
+    }
+
+    /**
+     * @test Test une variable qui ne ferme pas la quote -> exception
+     */
+    public function testMultilineNotClosingDoubleQuoteOneLine(): void
+    {
+        $this->createFile('/app/data/.env', 'TEST="Je ne ferme pas la quote');
+
+        $this->expectExceptionObject(
+            new Exception("Une variable a une double quote (\") qui ne se ferme pas, variable: TEST")
+        );
+
+        (new Dotenv('/app/data/.env'))->load();
+    }
+
+    /**
+     * @test Test une variable qui se présente sur plusieurs lignes sans fermer sa double quote -> exception
+     */
+    public function testMultilineNotClosingDoubleQuoteMultipleLines(): void
+    {
+        $this->createFile('/app/data/.env', "TEST=\"Je ne ferme pas la quote\nPas cette ligne\nNi la suivante");
+
+        $this->expectExceptionObject(
+            new Exception("Une variable a une double quote (\") qui ne se ferme pas, variable: TEST")
+        );
+
+        (new Dotenv('/app/data/.env'))->load();
+    }
+
+    /**
      * @test Test le fichier test.env, sample d'un vrai fichier .env
      */
-    public function testSampleTestCsvAllVariables(): void
+    public function testSampleTestEnvFile(): void
     {
         (new Dotenv('/app/tests/test.env'))->load();
 
         $this->assertVariableIsHandled('APP_ENV', 'development');
-        $this->assertVariableIsHandled('APP_NAME', '"Nom de l\'application test"'); // les quotes sont gardées
+        $this->assertVariableIsHandled('APP_NAME', 'Nom de l\'application test');
         $this->assertVariableIsHandled('APP_URL', 'https://test.local.fr');
         $this->assertVariableIsHandled('APP_CACHE', '/app/cache');
         $this->assertVariableIsHandled('APP_LOGS', '/app/logs');
@@ -276,6 +360,19 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         $this->assertVariableIsHandled('SECURITY_KEY', 'i³}tß¬¿ìò»å7L¼¤<¸%SÔº¶^µ2È]³öXG¹»ï@³î2jÒ8º');
         $this->assertVariableIsHandled('SECURITY_JWT_MIN_TTL', 0);
         $this->assertVariableIsHandled('SECURITY_JWT_MAX_TTL', 3600);
+        $this->assertVariableIsHandled(
+            'SECURITY_RSA_PUBLIC_KEY',
+            "-----BEGIN RSA PUBLIC KEY-----\n...\nKh9NV...\n...\n-----END RSA PUBLIC KEY-----"
+        );
+
+        $this->assertVariableIsHandled(
+            'SECURITY_RSA_PUBLIC_KEY',
+            '-----BEGIN RSA PUBLIC KEY-----
+...
+Kh9NV...
+...
+-----END RSA PUBLIC KEY-----'
+        );
 
         $this->assertVariableIsHandled('MAILER_DRIVER', 'smtp');
         $this->assertVariableIsHandled('MAILER_HOST', 'mailer.host@mailer.com');
