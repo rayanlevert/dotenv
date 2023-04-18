@@ -295,6 +295,38 @@ Line'
     }
 
     /**
+     * @test Test dans la variable multiline ayant des égales -> ne sont pas traitées car skip
+     */
+    public function testMultiLineWithEquals(): void
+    {
+        $_ENV = $_SERVER = [];
+
+        $this->createFile(
+            '/app/data/.env',
+            "TEST2=test2\n" . 'TEST="Firs=t
+Second
+Th=ird
+Lin=e"
+ANOTHERTEST=testvalue
+ANOTHERTEST2=testvalue3'
+        );
+
+        (new Dotenv('/app/data/.env'))->load();
+
+        $this->assertCount(4, $_ENV);
+        $this->assertVariableIsHandled('TEST2', 'test2');
+        $this->assertVariableIsHandled('ANOTHERTEST2', 'testvalue3');
+        $this->assertVariableIsHandled('ANOTHERTEST', 'testvalue');
+        $this->assertVariableIsHandled(
+            'TEST',
+            'Firs=t
+Second
+Th=ird
+Lin=e'
+        );
+    }
+
+    /**
      * @test Test une variable qui ne ferme pas la quote -> exception
      */
     public function testMultilineNotClosingDoubleQuoteOneLine(): void

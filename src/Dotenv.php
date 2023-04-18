@@ -30,7 +30,9 @@ class Dotenv
             return $this;
         }
 
-        foreach ($contents as $numberLine => $line) {
+        $oIterator = new \ArrayIterator($contents);
+
+        foreach ($oIterator as $numberLine => $line) {
             if (substr($line, 0, 1) === '#') {
                 continue;
             }
@@ -45,14 +47,17 @@ class Dotenv
                 continue;
             }
 
-            // Si une double quote est trouvé, on recherche le prochain pour fermer la valeur
+            /**
+             * Si une double quote est trouvée, on recherche la prochaine pour fermer la valeur
+             * Si plusieurs lines on été traitées, les skip pour ne pas les retraiter dans les prochaines itérations
+             */
             if (str_starts_with($exploded[1], '"')) {
-                $exploded[1] = $this->handleDoubleQuotes($exploded, $numberLine, $contents);
+                $oIterator->seek($numberLine + $this->handleDoubleQuotes($exploded, $numberLine, $contents));
             }
 
             list($name, $value) = $exploded;
 
-            if (isset($_SERVER[$name]) && isset($_ENV[$name])) {
+            if (array_key_exists($name, $_SERVER) && array_key_exists($name, $_ENV)) {
                 continue;
             }
 
@@ -100,21 +105,31 @@ class Dotenv
      * @param array<int, string> $contents Contenu du fichier
      *
      * @throws Exception Si le double quote fermant n'a pas été trouvé
+     *
+     * @return int Nombre de lignes que la variable à double quote possède
      */
-    private function handleDoubleQuotes(array $exploded, int $currentLine, array $contents): string
+    private function handleDoubleQuotes(array &$exploded, int $currentLine, array $contents): int
     {
-        $value = substr($exploded[1], 1);
+        $exploded[1] = substr($exploded[1], 1);
 
-        if (str_ends_with($value, '"')) {
-            return substr($value, 0, -1);
+        if (str_ends_with($exploded[1], '"')) {
+            $exploded[1] = substr($exploded[1], 0, -1);
+
+            return 0;
         }
 
+        $lines = 0;
+
         foreach (array_slice($contents, $currentLine + 1) as $line) {
+            $lines++;
+
             if (mb_strpos($line, '"')) {
-                return $value .= PHP_EOL . substr($line, 0, -1);
+                $exploded[1] .= PHP_EOL . substr($line, 0, -1);
+
+                return $lines;
             }
 
-            $value .= "\n$line";
+            $exploded[1] .= "\n$line";
         }
 
         throw new Exception("Une variable a une double quote (\") qui ne se ferme pas, variable: {$exploded[0]}");
