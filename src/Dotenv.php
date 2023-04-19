@@ -47,6 +47,10 @@ class Dotenv
                 continue;
             }
 
+            if (str_starts_with($exploded[1], '${')) {
+                $this->handleNestedVariable($exploded);
+            }
+
             /**
              * Si une double quote est trouvée, on recherche la prochaine pour fermer la valeur
              * Si plusieurs lines on été traitées, les skip pour ne pas les retraiter dans les prochaines itérations
@@ -98,9 +102,42 @@ class Dotenv
     }
 
     /**
+     * Si la valeur commence par ${ c'est que la variable utilise une variable nested -> essaie de la récupérer
+     * et remplace par la valeur de cette variable importée
+     *
+     * @param array{0: string, 1: string} $exploded Array explodé de la ligne (nom, valeur)
+     */
+    private function handleNestedVariable(array &$exploded): void
+    {
+        if (!$pos = mb_strrpos($exploded[1], '}')) {
+            throw new Exception("Variable {$exploded[0]} utilise une variable nested non fermée (\${})");
+        }
+
+        $nestedName = mb_substr($exploded[1], 2, $pos - 2);
+
+        if (array_key_exists($nestedName, $_ENV)) {
+            $this->replaceNested($nestedName, $_ENV[$nestedName], $exploded[1]);
+        } elseif (array_key_exists($nestedName, $_SERVER)) {
+            $this->replaceNested($nestedName, $_SERVER[$nestedName], $exploded[1]);
+        } elseif ($value = getenv($nestedName)) {
+            $this->replaceNested($nestedName, $value, $exploded[1]);
+        } else {
+            throw new Exception("Variable d'env nested $nestedName non trouvée par PHP");
+        }
+    }
+
+    /**
+     * Remove le dollar et l'accolade ouvrante et fermante (`${}`) par la valeur de la variable nested
+     */
+    private function replaceNested(string $name, string $value, string &$line): void
+    {
+        $line = str_replace(sprintf('${%s}', $name), $value, $line);
+    }
+
+    /**
      * Dès qu'un double quote est trouvé, cherche le deuxième pour établir le string
      *
-     * @param array{0: string, 1: string} $exploded Array explodé de la ligne (nom=valeur)
+     * @param array{0: string, 1: string} $exploded Array explodé de la ligne (nom, valeur)
      * @param int $currentLine Ligne à laquelle le double quote a été trouvé
      * @param array<int, string> $contents Contenu du fichier
      *

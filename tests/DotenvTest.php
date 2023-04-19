@@ -12,6 +12,21 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
      */
     protected array $filesToDelete = [];
 
+    protected function tearDown(): void
+    {
+        $_ENV = $_SERVER = [];
+
+        $this->deleteFiles();
+    }
+
+    /**
+     * Supprime les eventuels fichiers créés si l'on exit le script
+     */
+    public function __destruct()
+    {
+        $this->deleteFiles();
+    }
+
     /**
      * @test Test le fichier d'un string empty
      */
@@ -27,7 +42,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
      */
     public function testConstructorNotFile(): void
     {
-        $this->expectExceptionObject(new Exception(' n\'existe pas'));
+        $this->expectExceptionObject(new Exception('test n\'existe pas'));
 
         new Dotenv('test');
     }
@@ -355,6 +370,66 @@ Lin=e'
     }
 
     /**
+     * @test Test une variable nested en première déclaratation et deux autres qui l'utilise
+     */
+    public function testNestedVariableBeginningInFile(): void
+    {
+        $this->createFile('/app/data/.env', "NESTED=nestedValue\nTEST=\${NESTED}\nTEST2=\${NESTED}/test");
+
+        (new Dotenv('/app/data/.env'))->load();
+
+        $this->assertVariableIsHandled('NESTED', 'nestedValue');
+        $this->assertVariableIsHandled('TEST', 'nestedValue');
+        $this->assertVariableIsHandled('TEST2', 'nestedValue/test');
+    }
+
+    /**
+     * @test Test une variable dans le getenv nested
+     */
+    public function testNestedVariableGetEnv(): void
+    {
+        putenv('NESTED=nestedValue');
+        $this->assertSame('nestedValue', getenv('NESTED'));
+
+        $this->createFile('/app/data/.env', "TEST=\${NESTED}\nTEST2=\${NESTED}/test");
+
+        (new Dotenv('/app/data/.env'))->load();
+
+        $this->assertVariableIsHandled('TEST', 'nestedValue');
+        $this->assertVariableIsHandled('TEST2', 'nestedValue/test');
+
+        // Remove la variable d'env dans le getenv
+        putenv('NESTED');
+    }
+
+    /**
+     * @test Test une variable déjà présente dans le $_SERVER
+     */
+    public function testNestedVariableServer(): void
+    {
+        $_SERVER['NESTED'] = 'nested';
+
+        $this->createFile('/app/data/.env', "TEST=\${NESTED}\nTEST2=\${NESTED}/test");
+
+        (new Dotenv('/app/data/.env'))->load();
+
+        $this->assertVariableIsHandled('TEST', 'nested');
+        $this->assertVariableIsHandled('TEST2', 'nested/test');
+    }
+
+    /**
+     * @test Test une variable nested non trouvée -> exception
+     */
+    public function testNestedVariableNotFound(): void
+    {
+        $this->createFile('/app/data/.env', "TEST=\${NESTED}\nTEST2=\${NESTED}/test");
+
+        $this->expectExceptionObject(new Exception('Variable d\'env nested NESTED non trouvée par PHP'));
+
+        (new Dotenv('/app/data/.env'))->load();
+    }
+
+    /**
      * @test Test le fichier test.env, sample d'un vrai fichier .env
      */
     public function testSampleTestEnvFile(): void
@@ -369,6 +444,7 @@ Lin=e'
 
         $this->assertVariableIsHandled('WEB_DOCUMENT_ROOT', '/app/public');
         $this->assertVariableIsHandled('WEB_ALIAS_DOMAIN', 'test.local.fr');
+        $this->assertVariableIsHandled('WEB_DOCUMENT_ASSETS', '/app/public/assets');
 
         $this->assertVariableIsHandled('MYSQL_ROOT_PASSWORD', 'root');
         $this->assertVariableIsHandled('MYSQL_DATABASE', 'test_base');
@@ -430,22 +506,7 @@ Kh9NV...
         $this->assertSame($expected, $_ENV[$name], "\$_ENV[\$name] n'a pas retourné expected $expected");
 
         // Casté en string
-        $this->assertEquals($expected, getenv($name), "getenv($name) n'a pas retourné expected $expected");
-    }
-
-    protected function tearDown(): void
-    {
-        $_ENV = $_SERVER = [];
-
-        $this->deleteFiles();
-    }
-
-    /**
-     * Supprime les eventuels fichiers créés si l'on exit le script
-     */
-    public function __destruct()
-    {
-        $this->deleteFiles();
+        $this->assertSame(strval($expected), getenv($name), "getenv($name) n'a pas retourné expected $expected");
     }
 
     /**
