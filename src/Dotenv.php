@@ -112,6 +112,7 @@ class Dotenv
     {
         $exploded[1] = substr($exploded[1], 1);
 
+        // Si le double quote est sur la même ligne -> nul besoin de traverser les lignes suivantes
         if (str_ends_with($exploded[1], '"')) {
             $exploded[1] = substr($exploded[1], 0, -1);
 
@@ -120,6 +121,7 @@ class Dotenv
 
         $lines = 0;
 
+        // On boucle dans chaque ligne après la currente et concatène la valeur jusque le double quote trouvé
         foreach (array_slice($contents, $currentLine + 1) as $line) {
             $lines++;
 
