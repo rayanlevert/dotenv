@@ -33,6 +33,27 @@ NAME=false => $_ENV['NAME'] = false
 NAME=value string => $_ENV['NAME'] = 'value string'
 ```
 
+- Avoir des valeurs à plusieurs lignes (séparés par des `\n`), les doubles quotes (`"`) seront à utiliser
+
+    ```php
+    NAME="CECI EST UNE VARIABLE
+    A
+    PLUSIEURS
+    LIGNES"
+    ```
+
+- Utilisation de 'nested' variables déclarées au préalable via le même fichier ou `getenv()` de PHP (set via l'OS ou docker par ex.)
+
+```php
+    NESTED=VALUE
+    NAME=${NESTED}
+    NAME2=${NESTED}/path
+
+    $_ENV['NESTED'] = 'VALUE'
+    $_ENV['NAME'] = 'VALUE'
+    $_ENV['NAME2'] = 'VALUE/path'
+```
+
 Lève une `DisDev\Dotenv\Exception` si la ou les variables d'environnement passées en argument ne sont pas dans `$_ENV`
 
 ```php
