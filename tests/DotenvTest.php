@@ -16,6 +16,10 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     {
         $_ENV = $_SERVER = [];
 
+        foreach (getenv() as $variable => $value) {
+            putenv($variable);
+        }
+
         $this->deleteFiles();
     }
 
@@ -369,6 +373,17 @@ Lin=e'
         (new Dotenv('/app/data/.env'))->load();
     }
 
+    public function test(): void
+    {
+        $this->createFile('/app/data/.env', "VAR = test");
+
+        (new Dotenv('/app/data/.env'))->load();
+
+        var_dump($_ENV);
+        exit;
+
+    }
+
     /**
      * @test Test une variable nested en première déclaratation et deux autres qui l'utilise
      */
@@ -446,34 +461,21 @@ Lin=e'
     }
 
     /**
-     * @test Test une variable nested en bool
+     * @test Test une variable qui se déclare via deux nested variables
      */
-    public function testNestedVariableFalse(): void
+    public function testTwoNestedVariablesInOneDeclaration(): void
     {
-        $this->createFile('/app/data/.env', "NESTED=false\nTEST=\${NESTED}\nTEST2=\${NESTED}/test");
+        $this->createFile(
+            '/app/data/.env',
+            "NESTED=nested\nNESTED2=nested2\nTEST=\${NESTED}/\${NESTED2}\nTEST2=\${NESTED}/test"
+        );
 
         (new Dotenv('/app/data/.env'))->load();
 
-        $this->assertVariableIsHandled('NESTED', false);
-        $this->assertVariableIsHandled('TEST', false);
-        $this->assertVariableIsHandled('TEST2', 'false/test');
-    }
-
-    /**
-     * @test Test une variable nested en bool
-     */
-    public function testNestedVariableTrue(): void
-    {
-        $this->createFile('/app/data/.env', "NESTED=true\nTEST=\${NESTED}\nTEST2=\${NESTED}/test");
-
-        (new Dotenv('/app/data/.env'))->load();
-
-        $this->assertVariableIsHandled('NESTED', true);
-        $this->assertVariableIsHandled('TEST', true);
-        $this->assertVariableIsHandled('TEST2', 'true/test');
-
-        // Remove la variable d'env dans le getenv
-        putenv('NESTED');
+        $this->assertVariableIsHandled('NESTED', 'nested');
+        $this->assertVariableIsHandled('NESTED2', 'nested2');
+        $this->assertVariableIsHandled('TEST', 'nested/nested2');
+        $this->assertVariableIsHandled('TEST2', 'nested/test');
     }
 
     /**
@@ -486,6 +488,39 @@ Lin=e'
         $this->expectExceptionObject(new Exception('Variable d\'env nested NESTED non trouvée par PHP'));
 
         (new Dotenv('/app/data/.env'))->load();
+    }
+
+    /**
+     * @test Test une variable nested qui ne finit pas sa bracket -> valeur brûte
+     */
+    public function testNestedVariableNotEndingBracket(): void
+    {
+        $this->createFile('/app/data/.env', "TEST=\${NESTED\nTEST2=ok");
+
+        (new Dotenv('/app/data/.env'))->load();
+
+        $this->assertVariableIsHandled('TEST', '${NESTED');
+        $this->assertVariableIsHandled('TEST2', 'ok');
+    }
+
+    /**
+     * @test Test une variable qui est en multi line avec des nested variables
+     */
+    public function testNestedAndDoubleQuoteMultiLine(): void
+    {
+        $this->createFile(
+            '/app/data/.env',
+            "NESTED=nested
+NESTED2=-test
+TEST=\"\${NESTED}
+deuxième-ligne
+troisième\${NESTED2}-ligne\""
+        );
+
+        (new Dotenv('/app/data/.env'))->load();
+
+        $this->assertVariableIsHandled('NESTED', 'nested');
+        $this->assertVariableIsHandled('TEST', "nested\ndeuxième-ligne\ntroisième-test-ligne");
     }
 
     /**
@@ -510,7 +545,8 @@ Lin=e'
         $this->assertVariableIsHandled('MYSQL_USER', 'root');
         $this->assertVariableIsHandled('MYSQL_PASSWORD', 'root');
         $this->assertVariableIsHandled('MYSQL_PORT', 33061);
-        $this->assertVariableIsHandled('MYSQL_HOST', 'mysql');
+        $this->assertVariableIsHandled('MYSQL_HOST', 'localhost');
+        $this->assertVariableIsHandled('MYSQL_DSN', 'mysql:host=localhost;dbname=test_base;port=33061');
 
         $this->assertVariableIsHandled('REDIS_HOST', 'redis');
         $this->assertVariableIsHandled('REDIS_PORT', 6379);

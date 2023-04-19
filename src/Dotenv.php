@@ -23,6 +23,7 @@ class Dotenv
      * Lit le contenu du fichier et charge $_ENV et $_SERVER des variables d'environnement
      *
      * @throws Exception Si une valeur possède un " après le = et qu'un " fermant n'a pas été trouvé
+     * @throws Exception Si une variable nested n'a pas été récupérée par PHP
      */
     public function load(): self
     {
@@ -47,16 +48,17 @@ class Dotenv
                 continue;
             }
 
-            if (str_starts_with($exploded[1], '${')) {
-                $this->handleNestedVariable($exploded);
-            }
-
             /**
              * Si une double quote est trouvée, on recherche la prochaine pour fermer la valeur
              * Si plusieurs lines on été traitées, les skip pour ne pas les retraiter dans les prochaines itérations
              */
             if (str_starts_with($exploded[1], '"')) {
                 $oIterator->seek($numberLine + $this->handleDoubleQuotes($exploded, $numberLine, $contents));
+            }
+
+            // Si on a au moins ${ la valeur doit importer une ou plusieurs nested variables
+            if (str_contains($exploded[1], '${')) {
+                $this->handleNestedVariables($exploded);
             }
 
             list($name, $value) = $exploded;
@@ -106,39 +108,21 @@ class Dotenv
      * et remplace par la valeur de cette variable importée
      *
      * @param array{0: string, 1: string} $exploded Array explodé de la ligne (nom, valeur)
+     *
+     * @throws Exception Si une variable nested n'a pas été récupérée par PHP
      */
-    private function handleNestedVariable(array &$exploded): void
+    private function handleNestedVariables(array &$exploded): void
     {
-        if (!$pos = mb_strrpos($exploded[1], '}')) {
-            throw new Exception("Variable {$exploded[0]} utilise une variable nested non fermée (\${})");
-        }
+        $exploded[1] = preg_replace_callback('/\${([a-zA-Z0-9_.]+)}/', function (array $aMatches): string {
+            $nestedName = $aMatches[1];
 
-        $nestedName = mb_substr($exploded[1], 2, $pos - 2);
-
-        if (array_key_exists($nestedName, $_ENV)) {
-            $this->replaceNested($nestedName, $_ENV[$nestedName], $exploded[1]);
-        } elseif (array_key_exists($nestedName, $_SERVER)) {
-            $this->replaceNested($nestedName, $_SERVER[$nestedName], $exploded[1]);
-        } elseif ($value = getenv($nestedName)) {
-            $this->replaceNested($nestedName, $value, $exploded[1]);
-        } else {
-            throw new Exception("Variable d'env nested $nestedName non trouvée par PHP");
-        }
-    }
-
-    /**
-     * Remove le dollar et l'accolade ouvrante et fermante (`${}`) par la valeur de la variable nested
-     */
-    private function replaceNested(string $name, bool|string|float|int $value, string &$line): void
-    {
-        // Si un boolean est nested, on set le mot en string et non '' ou '1' casté
-        if ($value === true) {
-            $value = 'true';
-        } elseif ($value === false) {
-            $value = 'false';
-        }
-
-        $line = str_replace(sprintf('${%s}', $name), $value, $line);
+            return match (true) {
+                array_key_exists($nestedName, $_ENV)    => $_ENV[$nestedName],
+                array_key_exists($nestedName, $_SERVER) => $_SERVER[$nestedName],
+                getenv($nestedName) !== false           => getenv($nestedName),
+                default => throw new Exception("Variable d'env nested $nestedName non trouvée par PHP")
+            };
+        }, $exploded[1]);
     }
 
     /**
