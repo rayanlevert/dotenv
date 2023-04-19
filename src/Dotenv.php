@@ -129,8 +129,15 @@ class Dotenv
     /**
      * Remove le dollar et l'accolade ouvrante et fermante (`${}`) par la valeur de la variable nested
      */
-    private function replaceNested(string $name, string $value, string &$line): void
+    private function replaceNested(string $name, bool|string|float|int $value, string &$line): void
     {
+        // Si un boolean est nested, on set le mot en string et non '' ou '1' casté
+        if ($value === true) {
+            $value = 'true';
+        } elseif ($value === false) {
+            $value = 'false';
+        }
+
         $line = str_replace(sprintf('${%s}', $name), $value, $line);
     }
 

@@ -418,6 +418,65 @@ Lin=e'
     }
 
     /**
+     * @test Test une variable nested en integer
+     */
+    public function testNestedVariableInt(): void
+    {
+        $this->createFile('/app/data/.env', "NESTED=1\nTEST=\${NESTED}\nTEST2=\${NESTED}/test");
+
+        (new Dotenv('/app/data/.env'))->load();
+
+        $this->assertVariableIsHandled('NESTED', 1);
+        $this->assertVariableIsHandled('TEST', 1);
+        $this->assertVariableIsHandled('TEST2', '1/test');
+    }
+
+    /**
+     * @test Test une variable nested en float
+     */
+    public function testNestedVariableFloat(): void
+    {
+        $this->createFile('/app/data/.env', "NESTED=1.2\nTEST=\${NESTED}\nTEST2=\${NESTED}/test");
+
+        (new Dotenv('/app/data/.env'))->load();
+
+        $this->assertVariableIsHandled('NESTED', 1.2);
+        $this->assertVariableIsHandled('TEST', 1.2);
+        $this->assertVariableIsHandled('TEST2', '1.2/test');
+    }
+
+    /**
+     * @test Test une variable nested en bool
+     */
+    public function testNestedVariableFalse(): void
+    {
+        $this->createFile('/app/data/.env', "NESTED=false\nTEST=\${NESTED}\nTEST2=\${NESTED}/test");
+
+        (new Dotenv('/app/data/.env'))->load();
+
+        $this->assertVariableIsHandled('NESTED', false);
+        $this->assertVariableIsHandled('TEST', false);
+        $this->assertVariableIsHandled('TEST2', 'false/test');
+    }
+
+    /**
+     * @test Test une variable nested en bool
+     */
+    public function testNestedVariableTrue(): void
+    {
+        $this->createFile('/app/data/.env', "NESTED=true\nTEST=\${NESTED}\nTEST2=\${NESTED}/test");
+
+        (new Dotenv('/app/data/.env'))->load();
+
+        $this->assertVariableIsHandled('NESTED', true);
+        $this->assertVariableIsHandled('TEST', true);
+        $this->assertVariableIsHandled('TEST2', 'true/test');
+
+        // Remove la variable d'env dans le getenv
+        putenv('NESTED');
+    }
+
+    /**
      * @test Test une variable nested non trouvée -> exception
      */
     public function testNestedVariableNotFound(): void
