@@ -1,48 +1,44 @@
-## Gère les variables d'environnement d'une application PHP depuis un fichier .env
+## Simple and fast class handling an environment file to `$_ENV`, `$_SERVER` and `getenv()`
 
-Initialise l'instance en passant le chemin du fichier
+### Initializes the instance setting the file path
 
 ```php
-$oDotenv = new \DisDev\Dotenv\Dotenv('file/to/.dotenv');
+$oDotenv = new \RayanLevert\Dotenv\Dotenv('file/to/.dotenv');
 ```
+An exception `RayanLevert\Dotenv\Exception` will be thrown if the file is not readable
 
-Une exception `DisDev\Dotenv\Exception` sera lancée si
-- le fichier n'existe pas
-- le fichier n'est pas readable par le script
-- le fichier est vide
-
-Analyse le fichier et ajoute chaque variable et sa valeur dans `$_ENV`, `$_SERVER` et `getenv()`
+### Reads the file content and loads in `$_ENV`, `$_SERVER` et `getenv()`, values of each variable
 
 ```php
 $oDotenv->load();
 ```
 
-Pour chaque nouvelle ligne trouvée, essaie de set au nom de la variable la valeur après le signe =
+#### For each new line found, tries to set to the name of the variable its value after the `=` sign
 
 ```
 TEST_VALUE1=value1 => $_ENV['TEST_VALUE1'] = value1
 ```
 
-Si la valeur assignée est un type primitif autre que string, la valeur sera castée
+## If the value is a primitive value, the value will be casted to the `PHP` userland
 
 ```php
 NAME=1 => $_ENV['NAME'] = 1
-NAME=23.34 => $_ENV['NAME'] = 23.34 (les valeurs float seront castées uniquement si un point . est trouvé)
+NAME=23.34 => $_ENV['NAME'] = 23.34 (float values will be casted only with a dot .)
 NAME=true => $_ENV['NAME'] = true
 NAME=false => $_ENV['NAME'] = false
-NAME=value string => $_ENV['NAME'] = 'value string'
+NAME=string value => $_ENV['NAME'] = 'string value'
 ```
 
-- Avoir des valeurs à plusieurs lignes (séparés par des `\n`), les doubles quotes (`"`) seront à utiliser
+###  Multiline variables are also available ! (separated by `\n`), double quotes (`"`) will be used
 
     ```php
-    NAME="CECI EST UNE VARIABLE
-    A
-    PLUSIEURS
-    LIGNES"
+    NAME="This is a variable
+    with
+    multiple
+    lines"
     ```
 
-- Utilisation de 'nested' variables déclarées au préalable via le même fichier ou `getenv()` de PHP (set via l'OS ou docker par ex.)
+### Nested variables, declared beforehand via the same file or `getenv()` (set via the OS or docker for example)
 
 ```php
     NESTED=VALUE
@@ -54,10 +50,10 @@ NAME=value string => $_ENV['NAME'] = 'value string'
     $_ENV['NAME2'] = 'VALUE/path'
 ```
 
-Lève une `DisDev\Dotenv\Exception` si la ou les variables d'environnement passées en argument ne sont pas dans `$_ENV`
+Throw an `RayanLevert\Dotenv\Exception` if at least one variable is not present in the `$_ENV` superglobal
 
 ```php
 $oDotenv->required(['FIRST_REQUIRED', 'SECOND_REQUIRED']);
 ```
 
-Idéal si l'on veut certaines variables obligatoires pour une application, une exception sera lancée si l'on oublie une variable dans le fichier
+Worth if we want required variables for application purposes, an exception will be throw to prevent some logic error

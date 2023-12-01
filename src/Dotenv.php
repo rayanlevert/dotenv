@@ -20,7 +20,7 @@ class Dotenv
     }
 
     /**
-     * Reads the file content and loads in the the superglobals, values of each variable
+     * Reads the file content and loads in the superglobals, values of each variable
      *
      * @throws Exception If a variable doesn't end its value with a `"`
      * @throws Exception If an used nested variable is not known
