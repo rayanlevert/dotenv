@@ -1,6 +1,9 @@
 ## Simple, dependency-free and fast class handling an environment file to `$_ENV`, `$_SERVER` and `getenv()`
 
+[![Packagist Version](https://img.shields.io/packagist/v/rayanlevert/dotenv)](https://packagist.org/packages/rayanlevert/dotenv)
+[![PHP from Packagist](https://img.shields.io/packagist/php-v/rayanlevert/dotenv)](https://packagist.org/packages/rayanlevert/dotenv)
 [![codecov](https://codecov.io/gh/rayanlevert/dotenv/branch/main/graph/badge.svg)](https://codecov.io/gh/rayanlevert/dotenv)
+[![Packagist](https://img.shields.io/packagist/dd/rayanlevert/dotenv)](https://packagist.org/packages/phalcon/rayanlevert/dotenv)
 
 ### Initializes the instance setting the file path
 
