@@ -1,19 +1,17 @@
 FROM composer:latest as composer
-FROM php:8.1-fpm
+FROM php:8.3-fpm
 
-LABEL maintainer="Rayan Levert <rlevert@group-dis.com>"
+LABEL maintainer="Rayan Levert <rayanlevert@msn.com>"
 
 RUN apt update -y && \
     apt install -y \
     apt-utils \
     gettext \
-    git \
     libpq-dev \
     libzip-dev \
     nano \
     sudo \
-    wget \
-    zip
+    wget
 
 # Enabling xdebug
 RUN pecl install xdebug && docker-php-ext-enable xdebug
