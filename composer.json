@@ -2,6 +2,7 @@
     "name": "rayanlevert/dotenv",
     "description": "Handles an environment file (.env) et loads the variables and its values in $_ENV, $_SERVER and getenv() in the PHP userland",
     "type": "library",
+    "license": "BSD-3-Clause",
     "keywords": [
         "php",
         "env",
