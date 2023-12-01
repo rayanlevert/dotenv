@@ -1,6 +1,6 @@
 <?php
 
-namespace DisDev\Dotenv;
+namespace RayanLevert\Dotenv;
 
 /**
  * Class simple qui gère le fichier env et charge son contenu dans $_ENV, $_SERVER et getenv

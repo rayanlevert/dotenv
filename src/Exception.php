@@ -1,6 +1,6 @@
 <?php
 
-namespace DisDev\Dotenv;
+namespace RayanLevert\Dotenv;
 
 /**
  * Les exceptions levées dans DisDev\Dotenv\Dotenv utilseront cette classe
