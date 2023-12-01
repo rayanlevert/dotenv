@@ -3,27 +3,27 @@
 namespace RayanLevert\Dotenv;
 
 /**
- * Class simple qui gère le fichier env et charge son contenu dans $_ENV, $_SERVER et getenv
+ * Simple and fast class handling an environment file to `$_ENV`, `$_SERVER` and `getenv()`
  */
 class Dotenv
 {
     /**
-     * Set le chemin du fichier .env, vérifie qu'il est bien readable
+     * Initializes the instance setting the file path
      *
-     * @throws \DisDev\Dotenv\Exception Si le fichier n'existe pas, n'est pas readable ou est empty
+     * @throws \RayanLevert\Dotenv\Exception If the file is not readable
      */
     public function __construct(protected string $filePath)
     {
         if (!is_file($filePath) || !is_readable($filePath)) {
-            throw new Exception($filePath . ' n\'existe pas ou est empty');
+            throw new Exception("Environment file $filePath is not readable");
         }
     }
 
     /**
-     * Lit le contenu du fichier et charge $_ENV et $_SERVER des variables d'environnement
+     * Reads the file content and loads in the the superglobals, values of each variable
      *
-     * @throws Exception Si une valeur possède un " après le = et qu'un " fermant n'a pas été trouvé
-     * @throws Exception Si une variable nested n'a pas été récupérée par PHP
+     * @throws Exception If a variable doesn't end its value with a `"`
+     * @throws Exception If an used nested variable is not known
      */
     public function load(): self
     {
@@ -38,25 +38,25 @@ class Dotenv
                 continue;
             }
 
-            // Si il y a un espace + # après la déclaration de la variable, on enlève la partie doc
+            // If a space + # is found -> we remove the documentation part
             if ($pos = mb_strpos($line, ' #')) {
                 $line = trim(substr_replace($line, '', $pos));
             }
 
-            // Si il n'y a pas d'= (ou plusieurs = => on prend la valeur après le deuxième =)
+            // If no = exists or multiple ones are found -> we get the first one
             if (count($exploded = explode('=', $line, 2)) !== 2) {
                 continue;
             }
 
             /**
-             * Si une double quote est trouvée, on recherche la prochaine pour fermer la valeur
-             * Si plusieurs lines on été traitées, les skip pour ne pas les retraiter dans les prochaines itérations
+             * Double quote found -> we found the next closing double quote
+             * If multiple lines have been handled -> we skip those for the next iteration
              */
             if (str_starts_with($exploded[1], '"')) {
                 $oIterator->seek($numberLine + $this->handleDoubleQuotes($exploded, $numberLine, $contents));
             }
 
-            // Si on a au moins ${ la valeur doit importer une ou plusieurs nested variables
+            // Use of a nested variable '${}'
             if (str_contains($exploded[1], '${')) {
                 $this->handleNestedVariables($exploded);
             }
@@ -67,7 +67,10 @@ class Dotenv
                 continue;
             }
 
-            // Si la valeur est un nombre, on la cast en int ou en float, si false ou true on cast en bool
+            /**
+             * Value is a number -> integer or float casting
+             * Value is a boolean -> boolean casting
+             */
             if (is_numeric($value)) {
                 $value = (strpos($value, '.') ? (float) $value : (int) $value);
             } elseif ($value === 'false') {
@@ -84,11 +87,11 @@ class Dotenv
     }
 
     /**
-     * Vérifie que les variables d'env passées en paramètre existent bien dans $_ENV
+     * Verifies environment variables from the argument exist in `$_ENV`
      *
-     * @param array<int, string> $envs Array indéxé des variables d'env required
+     * @param array<int, string> $envs Indexed array of required environement variables
      *
-     * @throws \DisDev\Dotenv\Exception Si au moins une seule variable n'est pas présente
+     * @throws \RayanLevert\Dotenv\Exception If at least one variable is not present
      */
     public function required(array $envs): void
     {
@@ -104,12 +107,11 @@ class Dotenv
     }
 
     /**
-     * Si la valeur commence par ${ c'est que la variable utilise une variable nested -> essaie de la récupérer
-     * et remplace par la valeur de cette variable importée
+     * If a value starts with ${ -> use of a nested variable, we try to retrieve its value and replace it
      *
-     * @param array{0: string, 1: string} $exploded Array explodé de la ligne (nom, valeur)
+     * @param array{0: string, 1: string} $exploded Exploded array explodé of the line (name, value)
      *
-     * @throws Exception Si une variable nested n'a pas été récupérée par PHP
+     * @throws Exception If a nested variable is not retrieved
      */
     private function handleNestedVariables(array &$exploded): void
     {
@@ -120,27 +122,27 @@ class Dotenv
                 array_key_exists($nestedName, $_ENV)    => $_ENV[$nestedName],
                 array_key_exists($nestedName, $_SERVER) => $_SERVER[$nestedName],
                 getenv($nestedName) !== false           => getenv($nestedName),
-                default => throw new Exception("Variable d'env nested $nestedName non trouvée par PHP")
+                default => throw new Exception("Nested environment variable $nestedName not found")
             };
         }, $exploded[1]);
     }
 
     /**
-     * Dès qu'un double quote est trouvé, cherche le deuxième pour établir le string
+     * For double quotes found, we find the closing one to get the full value
      *
-     * @param array{0: string, 1: string} $exploded Array explodé de la ligne (nom, valeur)
-     * @param int $currentLine Ligne à laquelle le double quote a été trouvé
-     * @param array<int, string> $contents Contenu du fichier
+     * @param array{0: string, 1: string} $exploded Exploded array of the line (name, value)
+     * @param int $currentLine Number of the retrieved line
+     * @param array<int, string> $contents File contents
      *
-     * @throws Exception Si le double quote fermant n'a pas été trouvé
+     * @throws Exception If the closing quote has not been found
      *
-     * @return int Nombre de lignes que la variable à double quote possède
+     * @return int Line number the value's variable has
      */
     private function handleDoubleQuotes(array &$exploded, int $currentLine, array $contents): int
     {
         $exploded[1] = substr($exploded[1], 1);
 
-        // Si le double quote est sur la même ligne -> nul besoin de traverser les lignes suivantes
+        // If the doubloe quote is on the same line -> no need to loop
         if (str_ends_with($exploded[1], '"')) {
             $exploded[1] = substr($exploded[1], 0, -1);
 
@@ -149,7 +151,7 @@ class Dotenv
 
         $lines = 0;
 
-        // On boucle dans chaque ligne après la currente et concatène la valeur jusque le double quote trouvé
+        // We loop after each line to retrieve a closing quote
         foreach (array_slice($contents, $currentLine + 1) as $line) {
             $lines++;
 
@@ -162,6 +164,6 @@ class Dotenv
             $exploded[1] .= "\n$line";
         }
 
-        throw new Exception("Une variable a une double quote (\") qui ne se ferme pas, variable: {$exploded[0]}");
+        throw new Exception("Environment variable has a double quote (\") not closing in, variable: {$exploded[0]}");
     }
 }

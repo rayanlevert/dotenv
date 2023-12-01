@@ -8,7 +8,7 @@ use RayanLevert\Dotenv\Exception;
 class DotenvTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @var array<int, string> Fichiers à delete après chaque test unitaire
+     * @var array<int, string> Files to delete after each test
      */
     protected array $filesToDelete = [];
 
@@ -16,6 +16,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     {
         $_ENV = $_SERVER = [];
 
+        // Resets all getenv() variables
         foreach (getenv() as $variable => $value) {
             putenv($variable);
         }
@@ -24,7 +25,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Supprime les eventuels fichiers créés si l'on exit le script
+     * Deletes files if we exit the script
      */
     public function __destruct()
     {
@@ -32,27 +33,27 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @test Test le fichier d'un string empty
+     * @test empty string
      */
     public function testConstructorEmptyString(): void
     {
-        $this->expectExceptionObject(new Exception(' n\'existe pas'));
+        $this->expectExceptionObject(new Exception('Environment file  is not readable'));
 
         new Dotenv('');
     }
 
     /**
-     * @test Test le fichier d'un string qui n'est pas un fichier
+     * @test not a file
      */
     public function testConstructorNotFile(): void
     {
-        $this->expectExceptionObject(new Exception('test n\'existe pas'));
+        $this->expectExceptionObject(new Exception('Environment file test is not readable'));
 
         new Dotenv('test');
     }
 
     /**
-     * @test Test un fichier sans aucune donnée -> $_ENV empty
+     * @test empty file -> $_ENV empty
      */
     public function testConstructorEmptyFile(): void
     {
@@ -62,7 +63,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @test Test un fichier sans aucune donnée avec du required -> exception
+     * @test required envs with an empty file -> exception
      */
     public function testConstructorEmptyFileWithRequired(): void
     {
@@ -72,7 +73,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @test Test le fichier d'un string qui est bien un file
+     * @test correct file
      */
     public function testConstructorCorrectFile(): void
     {
@@ -82,7 +83,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @test Test le fichier ayant un diez au début
+     * @test with a # before the declaration
      */
     public function testFileWithHashDebut(): void
     {
@@ -93,13 +94,13 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @test Test une variable avec un diez -> il faut qu'il y ait un espace pour considérer un commentaire
+     * @test variables with a #
      */
     public function testValueWithDiez(): void
     {
         $this->createFile(
             '/app/data/.env',
-            "TEST=valueWith#\nTEST2=valueWith#InBetween\nTEST3=#\nTEST4=v a l u e # ici est le commentaire\nTEST5=test"
+            "TEST=valueWith#\nTEST2=valueWith#InBetween\nTEST3=#\nTEST4=v a l u e # here is the comment\nTEST5=test"
         );
 
         (new Dotenv('/app/data/.env'))->load();
@@ -112,7 +113,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @test Test le fichier avec un ligne sans egal = pas pris en compte
+     * @test line without an = -> not handled
      */
     public function testFileWithNoEqual(): void
     {
@@ -125,7 +126,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @test Test le fichier avec variable qui possède plusieurs égals
+     * @test variable with multiple =
      */
     public function testFileWithMoreThan2Equals(): void
     {
@@ -138,7 +139,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @test Test le fichier avec deux fois le même nom de variable = premiere valeur de prise
+     * @test two same variables = first one is handled
      */
     public function testFileWithSameVariable(): void
     {
@@ -149,7 +150,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @test Test une valeur float (avec un point)
+     * @test float variable (with a dot)
      */
     public function testFileWithFloatValue(): void
     {
@@ -160,7 +161,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @test Test une valeur float (avec une virgule => non prise en compte) donc string
+     * @test float variable with a comma -> string
      */
     public function testFileWithFloatValueButComma(): void
     {
@@ -171,7 +172,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @test Test une valeur integer
+     * @test integer variable
      */
     public function testFileWithIntValue(): void
     {
@@ -182,7 +183,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @test Test une valeur true
+     * @test true variable
      */
     public function testFileWithTrueValue(): void
     {
@@ -193,7 +194,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @test Test une valeur false
+     * @test false variable
      */
     public function testFileWithFalseValue(): void
     {
@@ -204,7 +205,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @test Test un empty $envs en required => pas d'exception
+     * @test empty required array => no exception
      */
     public function testRequiredEmptyEnvs(): void
     {
@@ -217,7 +218,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @test Test une variable non présente
+     * @test required a non existing variable
      */
     public function testRequiredOneEnvMissing(): void
     {
@@ -228,7 +229,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @test Test deux variables non présentes
+     * @test two required non existing variables
      */
     public function testRequiredTwoEnvMissing(): void
     {
@@ -239,7 +240,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @test Test une variable de présente et une autre non présente
+     * @test one required existing and another one not
      */
     public function testRequiredOneInOneNotMissing(): void
     {
@@ -250,7 +251,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @test Test une variable de présente mais pas la même casse => exception
+     * @test required variable case sensitive => exception
      */
     public function testRequiredOneCaseSensitive(): void
     {
@@ -261,7 +262,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @test Test une seule variable à multiline
+     * @test one multiline variable
      */
     public function testMultiLineOnlyVariable(): void
     {
@@ -285,7 +286,7 @@ Line'
     }
 
     /**
-     * @test Test plusieurs variables avec une à multiline
+     * @test multiple multiline variables
      */
     public function testMultiLineNotOnlyVariable(): void
     {
@@ -314,7 +315,7 @@ Line'
     }
 
     /**
-     * @test Test dans la variable multiline ayant des égales -> ne sont pas traitées car skip
+     * @test multiline variable with equals -> not handled because skipped
      */
     public function testMultiLineWithEquals(): void
     {
@@ -346,35 +347,35 @@ Lin=e'
     }
 
     /**
-     * @test Test une variable qui ne ferme pas la quote -> exception
+     * @test variable doesn't close its quote -> exception
      */
     public function testMultilineNotClosingDoubleQuoteOneLine(): void
     {
         $this->createFile('/app/data/.env', 'TEST="Je ne ferme pas la quote');
 
         $this->expectExceptionObject(
-            new Exception("Une variable a une double quote (\") qui ne se ferme pas, variable: TEST")
+            new Exception("Environment variable has a double quote (\") not closing in, variable: TEST")
         );
 
         (new Dotenv('/app/data/.env'))->load();
     }
 
     /**
-     * @test Test une variable qui se présente sur plusieurs lignes sans fermer sa double quote -> exception
+     * @test multiline variable not closing its quote -> exception
      */
     public function testMultilineNotClosingDoubleQuoteMultipleLines(): void
     {
         $this->createFile('/app/data/.env', "TEST=\"Je ne ferme pas la quote\nPas cette ligne\nNi la suivante");
 
         $this->expectExceptionObject(
-            new Exception("Une variable a une double quote (\") qui ne se ferme pas, variable: TEST")
+            new Exception("Environment variable has a double quote (\") not closing in, variable: TEST")
         );
 
         (new Dotenv('/app/data/.env'))->load();
     }
 
     /**
-     * @test Test une variable nested en première déclaratation et deux autres qui l'utilise
+     * @test nested variable in first declaration and others using it
      */
     public function testNestedVariableBeginningInFile(): void
     {
@@ -388,7 +389,7 @@ Lin=e'
     }
 
     /**
-     * @test Test une variable dans le getenv nested
+     * @test nested variable in the getenv() (from OS for example)
      */
     public function testNestedVariableGetEnv(): void
     {
@@ -407,7 +408,7 @@ Lin=e'
     }
 
     /**
-     * @test Test une variable déjà présente dans le $_SERVER
+     * @test nested variable in the $_SERVER
      */
     public function testNestedVariableServer(): void
     {
@@ -422,7 +423,7 @@ Lin=e'
     }
 
     /**
-     * @test Test une variable nested en integer
+     * @test nested integer variable
      */
     public function testNestedVariableInt(): void
     {
@@ -436,7 +437,7 @@ Lin=e'
     }
 
     /**
-     * @test Test une variable nested en float
+     * @test nested float variable
      */
     public function testNestedVariableFloat(): void
     {
@@ -450,7 +451,7 @@ Lin=e'
     }
 
     /**
-     * @test Test une variable qui se déclare via deux nested variables
+     * @test variable uses two nested variables
      */
     public function testTwoNestedVariablesInOneDeclaration(): void
     {
@@ -468,19 +469,19 @@ Lin=e'
     }
 
     /**
-     * @test Test une variable nested non trouvée -> exception
+     * @test nested variable not found -> exception
      */
     public function testNestedVariableNotFound(): void
     {
         $this->createFile('/app/data/.env', "TEST=\${NESTED}\nTEST2=\${NESTED}/test");
 
-        $this->expectExceptionObject(new Exception('Variable d\'env nested NESTED non trouvée par PHP'));
+        $this->expectExceptionObject(new Exception('Nested environment variable NESTED not found'));
 
         (new Dotenv('/app/data/.env'))->load();
     }
 
     /**
-     * @test Test une variable nested qui ne finit pas sa bracket -> valeur brûte
+     * @test nested variable not ending with a bracket -> raw value
      */
     public function testNestedVariableNotEndingBracket(): void
     {
@@ -493,7 +494,7 @@ Lin=e'
     }
 
     /**
-     * @test Test une variable qui est en multi line avec des nested variables
+     * @test multiline variable with nested variables
      */
     public function testNestedAndDoubleQuoteMultiLine(): void
     {
@@ -513,20 +514,20 @@ troisième\${NESTED2}-ligne\""
     }
 
     /**
-     * @test Test le fichier test.env, sample d'un vrai fichier .env
+     * @test testing a potential 'production' .env
      */
     public function testSampleTestEnvFile(): void
     {
         (new Dotenv('/app/tests/test.env'))->load();
 
         $this->assertVariableIsHandled('APP_ENV', 'development');
-        $this->assertVariableIsHandled('APP_NAME', 'Nom de l\'application test');
-        $this->assertVariableIsHandled('APP_URL', 'https://test.local.fr');
+        $this->assertVariableIsHandled('APP_NAME', 'Name of the application');
+        $this->assertVariableIsHandled('APP_URL', 'https://test.local.com');
         $this->assertVariableIsHandled('APP_CACHE', '/app/cache');
         $this->assertVariableIsHandled('APP_LOGS', '/app/logs');
 
         $this->assertVariableIsHandled('WEB_DOCUMENT_ROOT', '/app/public');
-        $this->assertVariableIsHandled('WEB_ALIAS_DOMAIN', 'test.local.fr');
+        $this->assertVariableIsHandled('WEB_ALIAS_DOMAIN', 'test.local.com');
         $this->assertVariableIsHandled('WEB_DOCUMENT_ASSETS', '/app/public/assets');
 
         $this->assertVariableIsHandled('MYSQL_ROOT_PASSWORD', 'root');
@@ -570,7 +571,7 @@ Kh9NV...
         $this->assertVariableIsHandled('MAILER_HOST', 'mailer.host@mailer.com');
         $this->assertVariableIsHandled('MAILER_PORT', 25);
         $this->assertVariableIsHandled('MAILER_USERNAME', 'username@test.com');
-        $this->assertVariableIsHandled('MAILER_PASSWORD', 'passwordAvecUn#DansLaValeur');
+        $this->assertVariableIsHandled('MAILER_PASSWORD', 'passwordWithAn#InTheValue');
         $this->assertVariableIsHandled('MAILER_FROM_EMAIL', 'username@test.com');
         $this->assertVariableIsHandled('MAILER_FROM_NAME', 'Mailer test');
 
@@ -579,7 +580,7 @@ Kh9NV...
     }
 
     /**
-     * Assert qu'une variable et sa valeur soit contenue dans $_ENV, $_SERVER et getenv()
+     * Asserts a variable and its value is in $_ENV, $_SERVER and getenv()
      */
     private function assertVariableIsHandled(string $name, bool|string|int|float $expected): void
     {
@@ -594,15 +595,17 @@ Kh9NV...
     }
 
     /**
-     * Créé un fichier au chemin $path avec les données $data (par défaut fichier vide) et assert que le fichier existe
+     * Creates a file at path `$path` with data `$data`
      *
-     * @return string Le chemin
+     * @throws \Exception If the file has not been created
+     *
+     * @return string The path
      */
     protected function createFile(string $path, string $data = ''): string
     {
-        file_put_contents($path, $data);
-
-        $this->assertFileExists($path);
+        if (file_put_contents($path, $data) === false) {
+            throw new \Exception("file_put_contents($path) returned false");
+        }
 
         $this->filesToDelete[] = $path;
 
@@ -610,7 +613,7 @@ Kh9NV...
     }
 
     /**
-     * On delete des fichiers si ils ont été créés pendant les tests unitaires
+     * Deletes files created in the tests
      */
     private function deleteFiles(): void
     {

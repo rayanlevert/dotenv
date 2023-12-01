@@ -3,7 +3,7 @@
 namespace RayanLevert\Dotenv;
 
 /**
- * Les exceptions levées dans DisDev\Dotenv\Dotenv utilseront cette classe
+ * Exceptions thrown in RayanLevert\Dotenv\Dotenv will use this class
  */
 class Exception extends \Exception
 {
