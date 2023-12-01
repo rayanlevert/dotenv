@@ -1,5 +1,5 @@
 {
-    "name": "dis-dev/dotenv",
+    "name": "rayanlevert/dotenv",
     "description": "Class qui gère un fichier d'environnement (.env) et charge son contenu dans les superglobals $_ENV et $_SERVER",
     "type": "library",
     "require": {
@@ -14,17 +14,17 @@
     "authors": [
         {
             "name": "Rayan Levert",
-            "email": "rayan.levert@group-dis.com"
+            "email": "rayanlevert@msn.com"
         }
     ],
     "autoload": {
         "psr-4": {
-            "DisDev\\Dotenv\\": "src/"
+            "RayanLevert\\Dotenv\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "DisDev\\Dotenv\\Tests\\": "tests/"
+            "RayanLevert\\Dotenv\\Tests\\": "tests/"
         }
     }
 }

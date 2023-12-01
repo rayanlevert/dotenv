@@ -1,9 +1,9 @@
 <?php
 
-namespace DisDev\Dotenv\Tests;
+namespace RayanLevert\Dotenv\Tests;
 
-use DisDev\Dotenv\Dotenv;
-use DisDev\Dotenv\Exception;
+use RayanLevert\Dotenv\Dotenv;
+use RayanLevert\Dotenv\Exception;
 
 class DotenvTest extends \PHPUnit\Framework\TestCase
 {
@@ -371,17 +371,6 @@ Lin=e'
         );
 
         (new Dotenv('/app/data/.env'))->load();
-    }
-
-    public function test(): void
-    {
-        $this->createFile('/app/data/.env', "VAR = test");
-
-        (new Dotenv('/app/data/.env'))->load();
-
-        var_dump($_ENV);
-        exit;
-
     }
 
     /**
