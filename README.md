@@ -1,5 +1,7 @@
 ## Simple and fast class handling an environment file to `$_ENV`, `$_SERVER` and `getenv()`
 
+[![codecov](https://codecov.io/gh/rayanlevert/dotenv/branch/main/graph/badge.svg)](https://codecov.io/gh/rayanlevert/dotenv)
+
 ### Initializes the instance setting the file path
 
 ```php
