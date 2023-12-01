@@ -1,0 +1,113 @@
+# Inspired by Sebastian Bergmann's phpunit action workflow https://github.com/sebastianbergmann/phpunit/blob/main/.github/workflows/ci.yml
+
+name: "CI"
+
+on:
+    - pull_request
+    - push
+
+jobs:
+    dependency-validation:
+        name: Dependency Validation
+
+        runs-on: ubuntu-latest
+
+        steps:
+          - name: Checkout
+            uses: actions/checkout@v4
+
+          - name: Install PHP
+            uses: shivammathur/setup-php@v2
+            with:
+              php-version: 8.3
+              extensions: mbstring
+              coverage: none
+              tools: none
+
+          - name: Ensure that composer.json is valid
+            run: composer validate --no-ansi --strict composer.json
+
+          - name: Ensure that dependencies can be installed
+            run: composer install --no-ansi --dry-run
+
+    coding-guidelines:
+        name: Coding Guidelines
+
+        needs:
+            - dependency-validation
+
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Install PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: 8.3
+                extensions: mbstring
+                coverage: none
+                tools: none
+
+            - name: Install dependencies with Composer
+              run: composer install --no-ansi
+
+            - name: Run PHP-CS-Fixer
+              run: vendor/bin/phpcs src
+
+    static-analysis:
+        name: Static analysis
+
+        needs:
+            - dependency-validation
+
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Install PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: 8.3
+                extensions: mbstring
+                coverage: none
+                tools: none
+
+            - name: Install dependencies with Composer
+              run: composer install --no-interaction --no-ansi --no-progress
+
+    unit-tests:
+        name: Unit tests
+
+        needs:
+            - dependency-validation
+
+        runs-on: ubuntu-latest
+
+        strategy:
+            fail-fast: false
+            matrix:
+                php-version:
+                    - "8.1"
+                    - "8.2"
+                    - "8.3"
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Install PHP with extensions
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: ${{ matrix.php-version }}
+                extensions: mbstring
+                tools: none
+
+            - name: Install dependencies with Composer
+              run: composer install --no-ansi --no-interaction --no-progress
+
+            - name: Run tests with PHPUnit
+              run: vendor/bin/phpunit
