@@ -105,9 +105,15 @@ jobs:
                 php-version: ${{ matrix.php-version }}
                 extensions: mbstring
                 tools: none
+                coverage: xdebug
 
             - name: Install dependencies with Composer
               run: composer install --no-ansi --no-interaction --no-progress
 
             - name: Run tests with PHPUnit
-              run: vendor/bin/phpunit
+              run: vendor/bin/phpunit --coverage-clover coverage.xml
+
+            - name: Upload coverage reports to Codecov
+              uses: codecov/codecov-action@v3
+              env:
+                CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
