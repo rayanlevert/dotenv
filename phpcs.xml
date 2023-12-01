@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<ruleset name="DisDev">
-    <description>DisDev Coding Standards</description>
+<ruleset name="RayanLevert">
+    <description>Rayan Levert Coding Standards</description>
 
     <arg name="colors"/>
     <arg value="sp"/>

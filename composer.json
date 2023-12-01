@@ -1,7 +1,15 @@
 {
     "name": "rayanlevert/dotenv",
-    "description": "Class qui gère un fichier d'environnement (.env) et charge son contenu dans les superglobals $_ENV et $_SERVER",
+    "description": "Handles an environment file (.env) et loads the variables and its values in $_ENV, $_SERVER and getenv() in the PHP userland",
     "type": "library",
+    "keywords": [
+        "php",
+        "env",
+        "dotenv"
+    ],
+    "support": {
+        "issues": "https://github.com/rayanlevert/dotenv/issues"
+    },
     "authors": [
         {
             "name": "Rayan Levert",
