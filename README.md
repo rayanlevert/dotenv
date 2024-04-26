@@ -3,12 +3,11 @@
 [![Packagist Version](https://img.shields.io/packagist/v/rayanlevert/dotenv)](https://packagist.org/packages/rayanlevert/dotenv)
 [![PHP from Packagist](https://img.shields.io/packagist/php-v/rayanlevert/dotenv)](https://packagist.org/packages/rayanlevert/dotenv)
 [![codecov](https://codecov.io/gh/rayanlevert/dotenv/branch/main/graph/badge.svg)](https://codecov.io/gh/rayanlevert/dotenv)
-[![Packagist](https://img.shields.io/packagist/dd/rayanlevert/dotenv)](https://packagist.org/packages/rayanlevert/dotenv/stats)
 
 ### Initializes the instance setting the file path
 
 ```php
-$oDotenv = new \RayanLevert\Dotenv\Dotenv('file/to/.dotenv');
+$oDotenv = new \RayanLevert\Dotenv\Dotenv('/file/to/.dotenv');
 ```
 An exception `RayanLevert\Dotenv\Exception` will be thrown if the file is not readable
 
@@ -36,12 +35,12 @@ NAME=string value => $_ENV['NAME'] = 'string value'
 
 ###  Multiline variables are also available ! (separated by `\n`), double quotes (`"`) will be used
 
-    ```php
+```php
     NAME="This is a variable
     with
     multiple
     lines"
-    ```
+```
 
 ### Nested variables, declared beforehand via the same file or `getenv()` (set via the OS or docker for example)
 
@@ -61,4 +60,4 @@ Throw an `RayanLevert\Dotenv\Exception` if at least one variable is not present 
 $oDotenv->required(['FIRST_REQUIRED', 'SECOND_REQUIRED']);
 ```
 
-Worth if we want required variables for application purposes, an exception will be throw to prevent some logic error
+Worth if we want required variables for application purposes, an exception will be thrown to prevent some logic error
