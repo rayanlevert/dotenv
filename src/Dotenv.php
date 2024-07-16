@@ -105,13 +105,13 @@ class Dotenv
     }
 
     /**
-     * Verifies environment variables from the argument exist in `$_ENV`
+     * Verifies environment variables exist in `$_ENV`
      *
-     * @param array<int, string> $envs Indexed array of required environement variables
+     * @param string ...$envs Required environment variables
      *
      * @throws \RayanLevert\Dotenv\Exception If at least one variable is not present
      */
-    public function required(array $envs): void
+    public function required(string ...$envs): void
     {
         foreach ($envs as $key => $env) {
             if (isset($_ENV[$env])) {

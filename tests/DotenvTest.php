@@ -85,7 +85,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     {
         $this->expectExceptionObject(new Exception('Missing env variables : APP_PATH'));
 
-        (new Dotenv($this->createFile('.env')))->load()->required(['APP_PATH']);
+        (new Dotenv($this->createFile('.env')))->load()->required(...['APP_PATH']);
     }
 
     /**
@@ -228,7 +228,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         $this->createFile('.env', 'TEST=false');
 
         $oDotenv = (new Dotenv($this->envFile))->load();
-        $oDotenv->required([]);
+        $oDotenv->required(...[]);
 
         $this->assertInstanceOf(Dotenv::class, $oDotenv);
     }
@@ -241,7 +241,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         $this->createFile('.env', 'TEST=false');
 
         $this->expectExceptionObject(new Exception('Missing env variables : TESTNOTIN'));
-        (new Dotenv($this->envFile))->load()->required(['TESTNOTIN']);
+        (new Dotenv($this->envFile))->load()->required(...['TESTNOTIN']);
     }
 
     /**
@@ -252,7 +252,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         $this->createFile('.env', 'TEST=false');
 
         $this->expectExceptionObject(new Exception('Missing env variables : TESTNOTIN, TESTNOTIN2'));
-        (new Dotenv($this->envFile))->load()->required(['TESTNOTIN', 'TESTNOTIN2']);
+        (new Dotenv($this->envFile))->load()->required(...['TESTNOTIN', 'TESTNOTIN2']);
     }
 
     /**
@@ -263,7 +263,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         $this->createFile('.env', 'TEST=false');
 
         $this->expectExceptionObject(new Exception('Missing env variables : TESTNOTIN'));
-        (new Dotenv($this->envFile))->load()->required(['TESTNOTIN', 'TEST']);
+        (new Dotenv($this->envFile))->load()->required(...['TESTNOTIN', 'TEST']);
     }
 
     /**
@@ -274,7 +274,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         $this->createFile('.env', 'TEST=false');
 
         $this->expectExceptionObject(new Exception('Missing env variables : test'));
-        (new Dotenv($this->envFile))->load()->required(['test']);
+        (new Dotenv($this->envFile))->load()->required(...['test']);
     }
 
     /**
