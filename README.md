@@ -57,7 +57,7 @@ NAME=string value => $_ENV['NAME'] = 'string value'
 Throw an `RayanLevert\Dotenv\Exception` if at least one variable is not present in the `$_ENV` superglobal
 
 ```php
-$oDotenv->required(['FIRST_REQUIRED', 'SECOND_REQUIRED']);
+$oDotenv->required('FIRST_REQUIRED', 'SECOND_REQUIRED');
 ```
 
 Worth if we want required variables for application purposes, an exception will be thrown to prevent some logic error
