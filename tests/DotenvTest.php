@@ -5,6 +5,12 @@ namespace RayanLevert\Dotenv\Tests;
 use RayanLevert\Dotenv\Dotenv;
 use RayanLevert\Dotenv\Exception;
 
+use function getenv;
+use function putenv;
+use function is_file;
+use function is_dir;
+use function exec;
+
 class DotenvTest extends \PHPUnit\Framework\TestCase
 {
     /**

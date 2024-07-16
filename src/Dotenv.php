@@ -2,6 +2,24 @@
 
 namespace RayanLevert\Dotenv;
 
+use function is_file;
+use function is_readable;
+use function file;
+use function substr;
+use function mb_strpos;
+use function trim;
+use function substr_replace;
+use function count;
+use function explode;
+use function str_starts_with;
+use function array_key_exists;
+use function str_contains;
+use function is_numeric;
+use function strpos;
+use function getenv;
+use function str_ends_with;
+use function array_slice;
+
 /**
  * Simple and fast class handling an environment file to `$_ENV`, `$_SERVER` and `getenv()`
  */
