@@ -1,5 +1,5 @@
-FROM composer:2.6.5 AS composer
-FROM php:8.3-fpm
+FROM composer:2.7.7 AS composer
+FROM php:8.3-cli
 
 LABEL maintainer="Rayan Levert <rayanlevert@msn.com>"
 
@@ -21,4 +21,4 @@ VOLUME ["/app"]
 # Composer
 COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 
-CMD ["php-fpm"]
+CMD ["php"]

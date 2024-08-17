@@ -1,9 +1,9 @@
-version: '2'
-
 services:
-  app:
+  dotenv:
     build: .
     restart: 'no'
+    tty: true
+    stdin_open: true
     working_dir: /app
     volumes:
       - .:/app
