@@ -4,6 +4,8 @@
 [![PHP from Packagist](https://img.shields.io/packagist/php-v/rayanlevert/dotenv)](https://packagist.org/packages/rayanlevert/dotenv)
 [![codecov](https://codecov.io/gh/rayanlevert/dotenv/branch/main/graph/badge.svg)](https://codecov.io/gh/rayanlevert/dotenv)
 
+> Version >= 3.0 supports only php8.4 with all brand new features, for >= php8.1, version 2.0 is still supported.
+
 ### Initializes the instance setting the file path
 
 ```php
