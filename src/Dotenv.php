@@ -20,9 +20,7 @@ use function getenv;
 use function str_ends_with;
 use function array_slice;
 
-/**
- * Simple and fast class handling an environment file to `$_ENV`, `$_SERVER` and `getenv()`
- */
+/** Simple and fast class handling an environment file to `$_ENV`, `$_SERVER` and `getenv()` */
 class Dotenv
 {
     /**
@@ -40,8 +38,8 @@ class Dotenv
     /**
      * Reads the file content and loads in the superglobals, values of each variable
      *
-     * @throws Exception If a variable doesn't end its value with a `"`
-     * @throws Exception If an used nested variable is not known
+     * @throws \RayanLevert\Dotenv\Exception If a variable doesn't end its value with a `"`
+     * @throws \RayanLevert\Dotenv\Exception If an used nested variable is not known
      */
     public function load(): self
     {
@@ -129,7 +127,7 @@ class Dotenv
      *
      * @param array{0: string, 1: string} $exploded Exploded array explodé of the line (name, value)
      *
-     * @throws Exception If a nested variable is not retrieved
+     * @throws \RayanLevert\Dotenv\Exception If a nested variable is not retrieved
      */
     private function handleNestedVariables(array &$exploded): void
     {
@@ -152,7 +150,7 @@ class Dotenv
      * @param int $currentLine Number of the retrieved line
      * @param array<int, string> $contents File contents
      *
-     * @throws Exception If the closing quote has not been found
+     * @throws \RayanLevert\Dotenv\Exception If the closing quote has not been found
      *
      * @return int Line number the value's variable has
      */
