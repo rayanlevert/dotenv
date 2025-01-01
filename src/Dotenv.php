@@ -54,7 +54,7 @@ class Dotenv
             }
 
             // If a space + # is found -> we remove the documentation part
-            if ($pos = self::strpos()($line, ' #')) {
+            if ($pos = self::multibyte('strpos')($line, ' #')) {
                 $line = trim(substr_replace($line, '', $pos));
             }
 
@@ -87,7 +87,7 @@ class Dotenv
              * Value is a boolean -> boolean casting
              */
             if (is_numeric($value)) {
-                $value = (self::strpos()($value, '.') ? (float) $value : (int) $value);
+                $value = (self::multibyte('strpos')($value, '.') ? (float) $value : (int) $value);
             } elseif ($value === 'false') {
                 $value = false;
             } elseif ($value === 'true') {
@@ -170,7 +170,7 @@ class Dotenv
         foreach (array_slice($contents, $currentLine + 1) as $line) {
             $lines++;
 
-            if (self::strpos()($line, '"')) {
+            if (self::multibyte('strpos')($line, '"')) {
                 $exploded[1] .= PHP_EOL . substr($line, 0, -1);
 
                 return $lines;
@@ -182,9 +182,11 @@ class Dotenv
         throw new Exception("Environment variable has a double quote (\") not closing in, variable: {$exploded[0]}");
     }
 
-    /** Returns either self::strpos( if multibyte extension is enabled or strpos */
-    private static function strpos(): callable
+    /** Returns either multibyte function or the standard one (if multibyte extension is enabled) */
+    private static function multibyte(string $function): callable
     {
-        return function_exists('mb_strpos') ? \mb_strpos(...) : \strpos(...);
+        $function = function_exists("mb_$function") ? "mb_$function" : $function;
+
+        return $function(...);
     }
 }
