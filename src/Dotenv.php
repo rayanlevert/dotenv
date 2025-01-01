@@ -6,7 +6,6 @@ use function is_file;
 use function is_readable;
 use function file;
 use function substr;
-use function mb_strpos;
 use function trim;
 use function substr_replace;
 use function count;
@@ -15,10 +14,10 @@ use function str_starts_with;
 use function array_key_exists;
 use function str_contains;
 use function is_numeric;
-use function strpos;
 use function getenv;
 use function str_ends_with;
 use function array_slice;
+use function function_exists;
 
 /** Simple and fast class handling an environment file to `$_ENV`, `$_SERVER` and `getenv()` */
 class Dotenv
@@ -55,7 +54,7 @@ class Dotenv
             }
 
             // If a space + # is found -> we remove the documentation part
-            if ($pos = mb_strpos($line, ' #')) {
+            if ($pos = self::strpos()($line, ' #')) {
                 $line = trim(substr_replace($line, '', $pos));
             }
 
@@ -88,7 +87,7 @@ class Dotenv
              * Value is a boolean -> boolean casting
              */
             if (is_numeric($value)) {
-                $value = (strpos($value, '.') ? (float) $value : (int) $value);
+                $value = (self::strpos()($value, '.') ? (float) $value : (int) $value);
             } elseif ($value === 'false') {
                 $value = false;
             } elseif ($value === 'true') {
@@ -171,7 +170,7 @@ class Dotenv
         foreach (array_slice($contents, $currentLine + 1) as $line) {
             $lines++;
 
-            if (mb_strpos($line, '"')) {
+            if (self::strpos()($line, '"')) {
                 $exploded[1] .= PHP_EOL . substr($line, 0, -1);
 
                 return $lines;
@@ -181,5 +180,11 @@ class Dotenv
         }
 
         throw new Exception("Environment variable has a double quote (\") not closing in, variable: {$exploded[0]}");
+    }
+
+    /** Returns either self::strpos( if multibyte extension is enabled or strpos */
+    private static function strpos(): callable
+    {
+        return function_exists('mb_strpos') ? \mb_strpos(...) : \strpos(...);
     }
 }
