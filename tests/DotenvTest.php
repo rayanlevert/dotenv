@@ -75,8 +75,10 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     #[Test]
     public function testConstructorEmptyFile(): void
     {
-        new Dotenv($this->createFile('.env'))->load();
+        $filePath = $this->createFile('.env');
+        $oEnv     = new Dotenv($filePath)->load();
 
+        $this->assertSame($filePath, $oEnv->filePath);
         $this->assertSame([], $_ENV);
     }
 

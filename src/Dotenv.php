@@ -25,7 +25,7 @@ class Dotenv
      *
      * @throws \RayanLevert\Dotenv\Exception If the file is not readable
      */
-    public function __construct(protected string $filePath)
+    public function __construct(public protected(set) readonly string $filePath)
     {
         if (!is_file($filePath) || !is_readable($filePath)) {
             throw new Exception("Environment file $filePath is not readable");
