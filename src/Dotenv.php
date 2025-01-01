@@ -5,8 +5,6 @@ namespace RayanLevert\Dotenv;
 use function is_file;
 use function is_readable;
 use function file;
-use function substr;
-use function trim;
 use function substr_replace;
 use function count;
 use function explode;
@@ -49,13 +47,13 @@ class Dotenv
         $oIterator = new \ArrayIterator($contents);
 
         foreach ($oIterator as $numberLine => $line) {
-            if (substr($line, 0, 1) === '#') {
+            if (self::multibyte('substr')($line, 0, 1) === '#') {
                 continue;
             }
 
             // If a space + # is found -> we remove the documentation part
             if ($pos = self::multibyte('strpos')($line, ' #')) {
-                $line = trim(substr_replace($line, '', $pos));
+                $line = self::multibyte('trim')(substr_replace($line, '', $pos));
             }
 
             // If no = exists or multiple ones are found -> we get the first one
@@ -155,11 +153,11 @@ class Dotenv
      */
     private function handleDoubleQuotes(array &$exploded, int $currentLine, array $contents): int
     {
-        $exploded[1] = substr($exploded[1], 1);
+        $exploded[1] = self::multibyte('substr')($exploded[1], 1);
 
         // If the doubloe quote is on the same line -> no need to loop
         if (str_ends_with($exploded[1], '"')) {
-            $exploded[1] = substr($exploded[1], 0, -1);
+            $exploded[1] = self::multibyte('substr')($exploded[1], 0, -1);
 
             return 0;
         }
@@ -171,7 +169,7 @@ class Dotenv
             $lines++;
 
             if (self::multibyte('strpos')($line, '"')) {
-                $exploded[1] .= PHP_EOL . substr($line, 0, -1);
+                $exploded[1] .= PHP_EOL . self::multibyte('substr')($line, 0, -1);
 
                 return $lines;
             }
@@ -185,7 +183,7 @@ class Dotenv
     /** Returns either multibyte function or the standard one (if multibyte extension is enabled) */
     private static function multibyte(string $function): callable
     {
-        $function = function_exists("mb_$function") ? "mb_$function" : $function;
+        $function = function_exists("\mb_$function") ? "\mb_$function" : "\\$function";
 
         return $function(...);
     }
