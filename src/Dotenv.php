@@ -5,9 +5,6 @@ namespace RayanLevert\Dotenv;
 use function is_file;
 use function is_readable;
 use function file;
-use function substr;
-use function mb_strpos;
-use function trim;
 use function substr_replace;
 use function count;
 use function explode;
@@ -15,14 +12,12 @@ use function str_starts_with;
 use function array_key_exists;
 use function str_contains;
 use function is_numeric;
-use function strpos;
 use function getenv;
 use function str_ends_with;
 use function array_slice;
+use function function_exists;
 
-/**
- * Simple and fast class handling an environment file to `$_ENV`, `$_SERVER` and `getenv()`
- */
+/** Simple and fast class handling an environment file to `$_ENV`, `$_SERVER` and `getenv()` */
 class Dotenv
 {
     /**
@@ -30,7 +25,7 @@ class Dotenv
      *
      * @throws \RayanLevert\Dotenv\Exception If the file is not readable
      */
-    public function __construct(protected string $filePath)
+    public function __construct(public protected(set) readonly string $filePath)
     {
         if (!is_file($filePath) || !is_readable($filePath)) {
             throw new Exception("Environment file $filePath is not readable");
@@ -40,8 +35,8 @@ class Dotenv
     /**
      * Reads the file content and loads in the superglobals, values of each variable
      *
-     * @throws Exception If a variable doesn't end its value with a `"`
-     * @throws Exception If an used nested variable is not known
+     * @throws \RayanLevert\Dotenv\Exception If a variable doesn't end its value with a `"`
+     * @throws \RayanLevert\Dotenv\Exception If an used nested variable is not known
      */
     public function load(): self
     {
@@ -52,13 +47,13 @@ class Dotenv
         $oIterator = new \ArrayIterator($contents);
 
         foreach ($oIterator as $numberLine => $line) {
-            if (substr($line, 0, 1) === '#') {
+            if (self::multibyte('substr', $line, 0, 1) === '#') {
                 continue;
             }
 
             // If a space + # is found -> we remove the documentation part
-            if ($pos = mb_strpos($line, ' #')) {
-                $line = trim(substr_replace($line, '', $pos));
+            if ($pos = self::multibyte('strpos', $line, ' #')) {
+                $line = self::multibyte('trim', substr_replace($line, '', (int) $pos));
             }
 
             // If no = exists or multiple ones are found -> we get the first one
@@ -90,7 +85,7 @@ class Dotenv
              * Value is a boolean -> boolean casting
              */
             if (is_numeric($value)) {
-                $value = (strpos($value, '.') ? (float) $value : (int) $value);
+                $value = (self::multibyte('strpos', $value, '.') ? (float) $value : (int) $value);
             } elseif ($value === 'false') {
                 $value = false;
             } elseif ($value === 'true') {
@@ -128,12 +123,13 @@ class Dotenv
      * If a value starts with ${ -> use of a nested variable, we try to retrieve its value and replace it
      *
      * @param array{0: string, 1: string} $exploded Exploded array explodé of the line (name, value)
+     * @param-out array{0: string, 1:string} $exploded
      *
-     * @throws Exception If a nested variable is not retrieved
+     * @throws \RayanLevert\Dotenv\Exception If a nested variable is not retrieved
      */
     private function handleNestedVariables(array &$exploded): void
     {
-        $exploded[1] = preg_replace_callback('/\${([a-zA-Z0-9_.]+)}/', function (array $aMatches): string {
+        $replaced = preg_replace_callback('/\${([a-zA-Z0-9_.]+)}/', static function (array $aMatches): string {
             $nestedName = $aMatches[1];
 
             return match (true) {
@@ -143,6 +139,11 @@ class Dotenv
                 default => throw new Exception("Nested environment variable $nestedName not found")
             };
         }, $exploded[1]);
+
+        // Asserts it is not a NULL value on Regex errors
+        if ($replaced) {
+            $exploded[1] = $replaced;
+        }
     }
 
     /**
@@ -152,17 +153,17 @@ class Dotenv
      * @param int $currentLine Number of the retrieved line
      * @param array<int, string> $contents File contents
      *
-     * @throws Exception If the closing quote has not been found
+     * @throws \RayanLevert\Dotenv\Exception If the closing quote has not been found
      *
      * @return int Line number the value's variable has
      */
     private function handleDoubleQuotes(array &$exploded, int $currentLine, array $contents): int
     {
-        $exploded[1] = substr($exploded[1], 1);
+        $exploded[1] = self::multibyte('substr', $exploded[1], 1);
 
-        // If the doubloe quote is on the same line -> no need to loop
+        // If the double quote is on the same line -> no need to loop
         if (str_ends_with($exploded[1], '"')) {
-            $exploded[1] = substr($exploded[1], 0, -1);
+            $exploded[1] = self::multibyte('substr', $exploded[1], 0, -1);
 
             return 0;
         }
@@ -173,8 +174,8 @@ class Dotenv
         foreach (array_slice($contents, $currentLine + 1) as $line) {
             $lines++;
 
-            if (mb_strpos($line, '"')) {
-                $exploded[1] .= PHP_EOL . substr($line, 0, -1);
+            if (self::multibyte('strpos', $line, '"')) {
+                $exploded[1] .= PHP_EOL . self::multibyte('substr', $line, 0, -1);
 
                 return $lines;
             }
@@ -183,5 +184,13 @@ class Dotenv
         }
 
         throw new Exception("Environment variable has a double quote (\") not closing in, variable: {$exploded[0]}");
+    }
+
+    /** Returns either multibyte function or the standard one (if multibyte extension is enabled) */
+    private static function multibyte(string $function, mixed ...$args): string
+    {
+        $function = function_exists("\mb_$function") ? "\mb_$function" : "\\$function";
+
+        return $function(...$args);
     }
 }
