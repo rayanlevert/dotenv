@@ -1,0 +1,9 @@
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/docker-compose.yml export-ignore
+/Dockerfile export-ignore
+/phpcs.xml export-ignore
+/phpunit.xml export-ignore
+/.github
+/data
+/tests
