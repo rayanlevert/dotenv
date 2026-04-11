@@ -1,5 +1,5 @@
-FROM composer:2.6.5 AS composer
-FROM php:8.3-fpm
+FROM composer:2.9.0 AS composer
+FROM php:8.3-cli
 
 LABEL maintainer="Rayan Levert <rayanlevert@msn.com>"
 
@@ -12,7 +12,7 @@ RUN apt-get update -y && \
 # Enabling xdebug
 RUN pecl install xdebug && docker-php-ext-enable xdebug
 
-# Créé le dossier /app
+# Create the /app directory
 RUN mkdir /app
 
 # Volumes
@@ -21,4 +21,4 @@ VOLUME ["/app"]
 # Composer
 COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 
-CMD ["php-fpm"]
+CMD ["php"]
