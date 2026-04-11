@@ -7,3 +7,4 @@
 /.github
 /data
 /tests
+/.php-cs-fixer.dist.php
