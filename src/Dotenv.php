@@ -2,20 +2,24 @@
 
 namespace RayanLevert\Dotenv;
 
-use function is_file;
-use function is_readable;
-use function file;
-use function substr_replace;
+use function array_key_exists;
+use function array_slice;
 use function count;
 use function explode;
-use function str_starts_with;
-use function array_key_exists;
-use function str_contains;
-use function is_numeric;
-use function getenv;
-use function str_ends_with;
-use function array_slice;
+use function file;
 use function function_exists;
+use function getenv;
+use function is_file;
+use function is_numeric;
+use function is_readable;
+use function str_contains;
+use function str_ends_with;
+use function str_starts_with;
+use function substr_replace;
+
+use const FILE_IGNORE_NEW_LINES;
+use const FILE_SKIP_EMPTY_LINES;
+use const PHP_EOL;
 
 /** Simple and fast class handling an environment file to `$_ENV`, `$_SERVER` and `getenv()` */
 class Dotenv
@@ -74,7 +78,7 @@ class Dotenv
                 $this->handleNestedVariables($exploded);
             }
 
-            list($name, $value) = $exploded;
+            [$name, $value] = $exploded;
 
             if (array_key_exists($name, $_SERVER) && array_key_exists($name, $_ENV)) {
                 continue;
