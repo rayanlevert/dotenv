@@ -4,6 +4,7 @@ namespace RayanLevert\Dotenv\Tests;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\TestDox;
 use RayanLevert\Dotenv\Dotenv;
 use RayanLevert\Dotenv\Exception;
 
@@ -22,9 +23,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
     /** Path of the tested environment file */
     protected string $envFile;
 
-    /**
-     * Deletes files if we exit the script
-     */
+    /** Deletes files if we exit the script */
     public function __destruct()
     {
         $this->deleteFiles();
@@ -47,33 +46,27 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         $this->deleteFiles();
     }
 
-    /**
-     * empty string
-     */
+    #[TestDox('empty string')]
     #[Test]
-    public function testConstructorEmptyString(): void
+    public function constructorEmptyString(): void
     {
         $this->expectExceptionObject(new Exception('Environment file  is not readable'));
 
         new Dotenv('');
     }
 
-    /**
-     * not a file
-     */
+    #[TestDox('not a file')]
     #[Test]
-    public function testConstructorNotFile(): void
+    public function constructorNotFile(): void
     {
         $this->expectExceptionObject(new Exception('Environment file test is not readable'));
 
         new Dotenv('test');
     }
 
-    /**
-     * empty file -> $_ENV empty
-     */
+    #[TestDox('empty file -> $_ENV empty')]
     #[Test]
-    public function testConstructorEmptyFile(): void
+    public function constructorEmptyFile(): void
     {
         $filePath = $this->createFile('.env');
         $oEnv     = new Dotenv($filePath)->load();
@@ -82,33 +75,27 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         $this->assertSame([], $_ENV);
     }
 
-    /**
-     * required envs with an empty file -> exception
-     */
+    #[TestDox('required envs with an empty file -> exception')]
     #[Test]
-    public function testConstructorEmptyFileWithRequired(): void
+    public function constructorEmptyFileWithRequired(): void
     {
         $this->expectExceptionObject(new Exception('Missing env variables : APP_PATH'));
 
         new Dotenv($this->createFile('.env'))->load()->required(...['APP_PATH']);
     }
 
-    /**
-     * correct file
-     */
+    #[TestDox('correct file')]
     #[Test]
-    public function testConstructorCorrectFile(): void
+    public function constructorCorrectFile(): void
     {
         $this->createFile('.env', 'test=test');
 
         $this->assertInstanceOf(Dotenv::class, new Dotenv($this->envFile));
     }
 
-    /**
-     * with a # before the declaration
-     */
+    #[TestDox('with a # before the declaration')]
     #[Test]
-    public function testFileWithHashDebut(): void
+    public function fileWithHashDebut(): void
     {
         $this->createFile('.env', '# TEST=test');
 
@@ -116,11 +103,9 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         $this->assertArrayNotHasKey('TEST', $_ENV);
     }
 
-    /**
-     * variables with a #
-     */
+    #[TestDox('variables with a #')]
     #[Test]
-    public function testValueWithDiez(): void
+    public function valueWithDiez(): void
     {
         $this->createFile(
             '.env',
@@ -136,11 +121,9 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         $this->assertVariableIsHandled('TEST5', 'test');
     }
 
-    /**
-     * line without an = -> not handled
-     */
+    #[TestDox('line without an = -> not handled')]
     #[Test]
-    public function testFileWithNoEqual(): void
+    public function fileWithNoEqual(): void
     {
         $this->createFile('.env', "TEST\nTEST2=correct");
 
@@ -150,11 +133,9 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         $this->assertVariableIsHandled('TEST2', 'correct');
     }
 
-    /**
-     * variable with multiple =
-     */
+    #[TestDox('variable with multiple =')]
     #[Test]
-    public function testFileWithMoreThan2Equals(): void
+    public function fileWithMoreThan2Equals(): void
     {
         $this->createFile('.env', "TEST=test=te\nTE=t=e=s=t");
 
@@ -164,11 +145,9 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         $this->assertVariableIsHandled('TE', 't=e=s=t');
     }
 
-    /**
-     * two same variables = first one is handled
-     */
+    #[TestDox('two same variables = first one is handled')]
     #[Test]
-    public function testFileWithSameVariable(): void
+    public function fileWithSameVariable(): void
     {
         $this->createFile('.env', "TEST=test1\nTEST=test2");
 
@@ -176,11 +155,9 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         $this->assertVariableIsHandled('TEST', 'test1');
     }
 
-    /**
-     * float variable (with a dot)
-     */
+    #[TestDox('float variable (with a dot)')]
     #[Test]
-    public function testFileWithFloatValue(): void
+    public function fileWithFloatValue(): void
     {
         $this->createFile('.env', 'TEST=34.3');
 
@@ -188,11 +165,9 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         $this->assertVariableIsHandled('TEST', 34.3);
     }
 
-    /**
-     * float variable with a comma -> string
-     */
+    #[TestDox('float variable with a comma -> string')]
     #[Test]
-    public function testFileWithFloatValueButComma(): void
+    public function fileWithFloatValueButComma(): void
     {
         $this->createFile('.env', 'TEST=34,3');
 
@@ -200,11 +175,9 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         $this->assertVariableIsHandled('TEST', '34,3');
     }
 
-    /**
-     * integer variable
-     */
+    #[TestDox('integer variable')]
     #[Test]
-    public function testFileWithIntValue(): void
+    public function fileWithIntValue(): void
     {
         $this->createFile('.env', 'TEST=34');
 
@@ -212,11 +185,9 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         $this->assertVariableIsHandled('TEST', 34);
     }
 
-    /**
-     * true variable
-     */
+    #[TestDox('true variable')]
     #[Test]
-    public function testFileWithTrueValue(): void
+    public function fileWithTrueValue(): void
     {
         $this->createFile('.env', 'TEST=true');
 
@@ -224,11 +195,9 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         $this->assertVariableIsHandled('TEST', true);
     }
 
-    /**
-     * false variable
-     */
+    #[TestDox('false variable')]
     #[Test]
-    public function testFileWithFalseValue(): void
+    public function fileWithFalseValue(): void
     {
         $this->createFile('.env', 'TEST=false');
 
@@ -236,11 +205,9 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         $this->assertVariableIsHandled('TEST', false);
     }
 
-    /**
-     * empty required array => no exception
-     */
+    #[TestDox('empty required array => no exception')]
     #[Test]
-    public function testRequiredEmptyEnvs(): void
+    public function requiredEmptyEnvs(): void
     {
         $this->createFile('.env', 'TEST=false');
 
@@ -250,11 +217,9 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Dotenv::class, $oDotenv);
     }
 
-    /**
-     * required a non existing variable
-     */
+    #[TestDox('required a non existing variable')]
     #[Test]
-    public function testRequiredOneEnvMissing(): void
+    public function requiredOneEnvMissing(): void
     {
         $this->createFile('.env', 'TEST=false');
 
@@ -262,11 +227,9 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         new Dotenv($this->envFile)->load()->required(...['TESTNOTIN']);
     }
 
-    /**
-     * two required non existing variables
-     */
+    #[TestDox('two required non existing variables')]
     #[Test]
-    public function testRequiredTwoEnvMissing(): void
+    public function requiredTwoEnvMissing(): void
     {
         $this->createFile('.env', 'TEST=false');
 
@@ -274,11 +237,9 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         new Dotenv($this->envFile)->load()->required(...['TESTNOTIN', 'TESTNOTIN2']);
     }
 
-    /**
-     * one required existing and another one not
-     */
+    #[TestDox('one required existing and another one not')]
     #[Test]
-    public function testRequiredOneInOneNotMissing(): void
+    public function requiredOneInOneNotMissing(): void
     {
         $this->createFile('.env', 'TEST=false');
 
@@ -286,11 +247,9 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         new Dotenv($this->envFile)->load()->required(...['TESTNOTIN', 'TEST']);
     }
 
-    /**
-     * required variable case sensitive => exception
-     */
+    #[TestDox('required variable case sensitive => exception')]
     #[Test]
-    public function testRequiredOneCaseSensitive(): void
+    public function requiredOneCaseSensitive(): void
     {
         $this->createFile('.env', 'TEST=false');
 
@@ -298,11 +257,9 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
         new Dotenv($this->envFile)->load()->required(...['test']);
     }
 
-    /**
-     * one multiline variable
-     */
+    #[TestDox('one multiline variable')]
     #[Test]
-    public function testMultiLineOnlyVariable(): void
+    public function multiLineOnlyVariable(): void
     {
         $this->createFile(
             '.env',
@@ -323,11 +280,9 @@ Line'
         );
     }
 
-    /**
-     * multiple multiline variables
-     */
+    #[TestDox('multiple multiline variables')]
     #[Test]
-    public function testMultiLineNotOnlyVariable(): void
+    public function multiLineNotOnlyVariable(): void
     {
         $this->createFile(
             '.env',
@@ -353,11 +308,9 @@ Line'
         $this->assertVariableIsHandled('ANOTHERTEST2', 'testvalue3');
     }
 
-    /**
-     * multiline variable with equals -> not handled because skipped
-     */
+    #[TestDox('multiline variable with equals -> not handled because skipped')]
     #[Test]
-    public function testMultiLineWithEquals(): void
+    public function multiLineWithEquals(): void
     {
         $_ENV = $_SERVER = [];
 
@@ -386,11 +339,9 @@ Lin=e'
         );
     }
 
-    /**
-     * variable doesn't close its quote -> exception
-     */
+    #[TestDox('variable doesn\'t close its quote -> exception')]
     #[Test]
-    public function testMultilineNotClosingDoubleQuoteOneLine(): void
+    public function multilineNotClosingDoubleQuoteOneLine(): void
     {
         $this->createFile('.env', 'TEST="Je ne ferme pas la quote');
 
@@ -401,11 +352,9 @@ Lin=e'
         new Dotenv($this->envFile)->load();
     }
 
-    /**
-     * multiline variable not closing its quote -> exception
-     */
+    #[TestDox('multiline variable not closing its quote -> exception')]
     #[Test]
-    public function testMultilineNotClosingDoubleQuoteMultipleLines(): void
+    public function multilineNotClosingDoubleQuoteMultipleLines(): void
     {
         $this->createFile('.env', "TEST=\"Je ne ferme pas la quote\nPas cette ligne\nNi la suivante");
 
@@ -416,11 +365,9 @@ Lin=e'
         new Dotenv($this->envFile)->load();
     }
 
-    /**
-     * nested variable in first declaration and others using it
-     */
+    #[TestDox('nested variable in first declaration and others using it')]
     #[Test]
-    public function testNestedVariableBeginningInFile(): void
+    public function nestedVariableBeginningInFile(): void
     {
         $this->createFile('.env', "NESTED=nestedValue\nTEST=\${NESTED}\nTEST2=\${NESTED}/test");
 
@@ -431,11 +378,9 @@ Lin=e'
         $this->assertVariableIsHandled('TEST2', 'nestedValue/test');
     }
 
-    /**
-     * nested variable in the getenv() (from OS for example)
-     */
+    #[TestDox('nested variable in the getenv() (from OS for example)')]
     #[Test]
-    public function testNestedVariableGetEnv(): void
+    public function nestedVariableGetEnv(): void
     {
         putenv('NESTED=nestedValue');
         $this->assertSame('nestedValue', getenv('NESTED'));
@@ -451,11 +396,9 @@ Lin=e'
         putenv('NESTED');
     }
 
-    /**
-     * nested variable in the $_SERVER
-     */
+    #[TestDox('nested variable in the $_SERVER')]
     #[Test]
-    public function testNestedVariableServer(): void
+    public function nestedVariableServer(): void
     {
         $_SERVER['NESTED'] = 'nested';
 
@@ -467,11 +410,9 @@ Lin=e'
         $this->assertVariableIsHandled('TEST2', 'nested/test');
     }
 
-    /**
-     * nested integer variable
-     */
+    #[TestDox('nested integer variable')]
     #[Test]
-    public function testNestedVariableInt(): void
+    public function nestedVariableInt(): void
     {
         $this->createFile('.env', "NESTED=1\nTEST=\${NESTED}\nTEST2=\${NESTED}/test");
 
@@ -482,11 +423,9 @@ Lin=e'
         $this->assertVariableIsHandled('TEST2', '1/test');
     }
 
-    /**
-     * nested float variable
-     */
+    #[TestDox('nested float variable')]
     #[Test]
-    public function testNestedVariableFloat(): void
+    public function nestedVariableFloat(): void
     {
         $this->createFile('.env', "NESTED=1.2\nTEST=\${NESTED}\nTEST2=\${NESTED}/test");
 
@@ -497,11 +436,9 @@ Lin=e'
         $this->assertVariableIsHandled('TEST2', '1.2/test');
     }
 
-    /**
-     * variable uses two nested variables
-     */
+    #[TestDox('variable uses two nested variables')]
     #[Test]
-    public function testTwoNestedVariablesInOneDeclaration(): void
+    public function twoNestedVariablesInOneDeclaration(): void
     {
         $this->createFile(
             '.env',
@@ -516,11 +453,9 @@ Lin=e'
         $this->assertVariableIsHandled('TEST2', 'nested/test');
     }
 
-    /**
-     * nested variable not found -> exception
-     */
+    #[TestDox('nested variable not found -> exception')]
     #[Test]
-    public function testNestedVariableNotFound(): void
+    public function nestedVariableNotFound(): void
     {
         $this->createFile('.env', "TEST=\${NESTED}\nTEST2=\${NESTED}/test");
 
@@ -529,11 +464,9 @@ Lin=e'
         new Dotenv($this->envFile)->load();
     }
 
-    /**
-     * nested variable not ending with a bracket -> raw value
-     */
+    #[TestDox('nested variable not ending with a bracket -> raw value')]
     #[Test]
-    public function testNestedVariableNotEndingBracket(): void
+    public function nestedVariableNotEndingBracket(): void
     {
         $this->createFile('.env', "TEST=\${NESTED\nTEST2=ok");
 
@@ -543,11 +476,9 @@ Lin=e'
         $this->assertVariableIsHandled('TEST2', 'ok');
     }
 
-    /**
-     * multiline variable with nested variables
-     */
+    #[TestDox('multiline variable with nested variables')]
     #[Test]
-    public function testNestedAndDoubleQuoteMultiLine(): void
+    public function nestedAndDoubleQuoteMultiLine(): void
     {
         $this->createFile(
             '.env',
@@ -564,11 +495,9 @@ troisième${NESTED2}-ligne"'
         $this->assertVariableIsHandled('TEST', "nested\ndeuxième-ligne\ntroisième-test-ligne");
     }
 
-    /**
-     * testing a potential 'production' .env
-     */
+    #[TestDox('testing a potential production .env')]
     #[Test]
-    public function testSampleTestEnvFile(): void
+    public function sampleTestEnvFile(): void
     {
         new Dotenv(__DIR__ . '/test.env')->load();
 
@@ -631,13 +560,7 @@ Kh9NV...
         $this->assertVariableIsHandled('XDEBUG_REMOTE_PORT', 9000);
     }
 
-    /**
-     * Creates a file at path `../data/$file` with data `$data`
-     *
-     * @throws \Exception If the file has not been created
-     *
-     * @return string The path
-     */
+    /** Creates a file at path ../data/$file with data $data */
     protected function createFile(string $file, string $data = ''): string
     {
         $file = dirname(__DIR__) . '/data/' . $file;
@@ -651,9 +574,7 @@ Kh9NV...
         return $file;
     }
 
-    /**
-     * Asserts a variable and its value is in $_ENV, $_SERVER and getenv()
-     */
+    /** Asserts a variable and its value is in $_ENV, $_SERVER and getenv() */
     private function assertVariableIsHandled(string $name, bool|float|int|string $expected): void
     {
         $this->assertArrayHasKey($name, $_SERVER, "\$_SERVER n'a pas la clef $name");
@@ -666,9 +587,7 @@ Kh9NV...
         $this->assertSame((string) $expected, getenv($name), "getenv($name) n'a pas retourné expected $expected");
     }
 
-    /**
-     * Deletes files created in the tests
-     */
+    /** Deletes files created in the tests */
     private function deleteFiles(): void
     {
         if (!$this->filesToDelete) {
