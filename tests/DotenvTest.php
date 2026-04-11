@@ -5,11 +5,11 @@ namespace RayanLevert\Dotenv\Tests;
 use RayanLevert\Dotenv\Dotenv;
 use RayanLevert\Dotenv\Exception;
 
-use function getenv;
-use function putenv;
-use function is_file;
-use function is_dir;
 use function exec;
+use function getenv;
+use function is_dir;
+use function is_file;
+use function putenv;
 
 class DotenvTest extends \PHPUnit\Framework\TestCase
 {
@@ -22,6 +22,14 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
      * Path of the tested environment file
      */
     protected string $envFile;
+
+    /**
+     * Deletes files if we exit the script
+     */
+    public function __destruct()
+    {
+        $this->deleteFiles();
+    }
 
     protected function setUp(): void
     {
@@ -37,14 +45,6 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
             putenv($variable);
         }
 
-        $this->deleteFiles();
-    }
-
-    /**
-     * Deletes files if we exit the script
-     */
-    public function __destruct()
-    {
         $this->deleteFiles();
     }
 
@@ -103,7 +103,7 @@ class DotenvTest extends \PHPUnit\Framework\TestCase
      */
     public function testFileWithHashDebut(): void
     {
-        $this->createFile('.env', "# TEST=test");
+        $this->createFile('.env', '# TEST=test');
 
         $this->assertInstanceOf(Dotenv::class, (new Dotenv($this->envFile))->load());
         $this->assertArrayNotHasKey('TEST', $_ENV);
@@ -370,7 +370,7 @@ Lin=e'
         $this->createFile('.env', 'TEST="Je ne ferme pas la quote');
 
         $this->expectExceptionObject(
-            new Exception("Environment variable has a double quote (\") not closing in, variable: TEST")
+            new Exception('Environment variable has a double quote (") not closing in, variable: TEST')
         );
 
         (new Dotenv($this->envFile))->load();
@@ -384,7 +384,7 @@ Lin=e'
         $this->createFile('.env', "TEST=\"Je ne ferme pas la quote\nPas cette ligne\nNi la suivante");
 
         $this->expectExceptionObject(
-            new Exception("Environment variable has a double quote (\") not closing in, variable: TEST")
+            new Exception('Environment variable has a double quote (") not closing in, variable: TEST')
         );
 
         (new Dotenv($this->envFile))->load();
@@ -516,11 +516,11 @@ Lin=e'
     {
         $this->createFile(
             '.env',
-            "NESTED=nested
+            'NESTED=nested
 NESTED2=-test
-TEST=\"\${NESTED}
+TEST="${NESTED}
 deuxième-ligne
-troisième\${NESTED2}-ligne\""
+troisième${NESTED2}-ligne"'
         );
 
         (new Dotenv($this->envFile))->load();
@@ -596,21 +596,6 @@ Kh9NV...
     }
 
     /**
-     * Asserts a variable and its value is in $_ENV, $_SERVER and getenv()
-     */
-    private function assertVariableIsHandled(string $name, bool|string|int|float $expected): void
-    {
-        $this->assertArrayHasKey($name, $_SERVER, "\$_SERVER n'a pas la clef $name");
-        $this->assertSame($expected, $_SERVER[$name], "\$_SERVER[$name] n'a pas retourné expected $expected");
-
-        $this->assertArrayHasKey($name, $_ENV, "\$_ENV n'a pas la clef $name");
-        $this->assertSame($expected, $_ENV[$name], "\$_ENV[\$name] n'a pas retourné expected $expected");
-
-        // Casté en string
-        $this->assertSame(strval($expected), getenv($name), "getenv($name) n'a pas retourné expected $expected");
-    }
-
-    /**
      * Creates a file at path `../data/$file` with data `$data`
      *
      * @throws \Exception If the file has not been created
@@ -628,6 +613,21 @@ Kh9NV...
         $this->filesToDelete[] = $file;
 
         return $file;
+    }
+
+    /**
+     * Asserts a variable and its value is in $_ENV, $_SERVER and getenv()
+     */
+    private function assertVariableIsHandled(string $name, bool|float|int|string $expected): void
+    {
+        $this->assertArrayHasKey($name, $_SERVER, "\$_SERVER n'a pas la clef $name");
+        $this->assertSame($expected, $_SERVER[$name], "\$_SERVER[$name] n'a pas retourné expected $expected");
+
+        $this->assertArrayHasKey($name, $_ENV, "\$_ENV n'a pas la clef $name");
+        $this->assertSame($expected, $_ENV[$name], "\$_ENV[\$name] n'a pas retourné expected $expected");
+
+        // Casté en string
+        $this->assertSame((string) $expected, getenv($name), "getenv($name) n'a pas retourné expected $expected");
     }
 
     /**
