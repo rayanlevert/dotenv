@@ -1,4 +1,4 @@
-FROM composer:2.9.0 AS composer
+FROM composer:2.9.5 AS composer
 FROM php:8.3-cli
 
 LABEL maintainer="Rayan Levert <rayanlevert@msn.com>"

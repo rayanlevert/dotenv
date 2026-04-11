@@ -1,7 +1,9 @@
 services:
-  app:
+  dotenv-8.3:
     build: .
     restart: 'no'
+    tty: true
+    stdin_open: true
     working_dir: /app
     volumes:
       - .:/app

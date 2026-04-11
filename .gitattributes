@@ -7,3 +7,4 @@
 /Dockerfile export-ignore
 /tests export-ignore
 /data export-ignore
+/.php-cs-fixer.dist.php export-ignore
