@@ -1,5 +1,6 @@
 /vendor/
 .phpunit.cache
+.php-cs-fixer.cache
 
 data/*
 !/**/.gitkeep
