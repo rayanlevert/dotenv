@@ -1,5 +1,5 @@
 services:
-  dotenv-8.4:
+  dotenv-8.5:
     build: .
     restart: 'no'
     tty: true
